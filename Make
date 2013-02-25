@@ -1,0 +1,47 @@
+# Includes
+##########
+-I src
+-R theories Coqbottom
+
+## Targets
+##########
+CMX_TARGETS = "src/coqbottomConstants.cmx \
+            src/coqbottomState.cmx \
+	    src/coqbottomDynamicCompilation.cmx \
+	    src/coqbottom.cmx \
+	    src/coqbottomPluginModule.cmx"
+
+CMO_TARGETS = $(CMX_TARGETS:.cmx=.cmo)
+
+# Native compilation options
+############################
+OPT_OPTIONS = "$(CAMLOPTLINK) $(ZDEBUG) $(ZFLAGS) -shared -o $@ $^"
+-custom $(OPT_OPTIONS) $(CMX_TARGETS) src/coqbottomPlugin.cmxs
+
+# Bytecode compilation options
+##############################
+-custom "$(CAMLLINK) -g -a -o $@ $^" $(CMO_TARGETS) src/coqbottomPlugin.cma
+
+# Custom variables
+##################
+COQEPLUGIN = "src/coqbottomPlugin.cma"
+COQEPLUGINOPT = "src/coqbottomPlugin.cmxs"
+COQDOC = "$(COQBIN)coqdoc -interpolate -utf8"
+CAMLP4OPTIONS = "-loc loc"
+
+# Compilation units
+###################
+src/coqbottomConstants.ml
+src/coqbottomState.mli
+src/coqbottomState.ml
+src/coqbottomDynamicCompilation.mli
+src/coqbottomDynamicCompilation.ml
+src/coqbottom.ml4
+src/coqbottomPluginModule.ml
+src/coqbottomPlugin.mllib
+theories/Coqbottom.v
+theories/DataStructures.v
+theories/Map.v
+theories/Memoization.v
+theories/Monad.v
+theories/Reifiable.v

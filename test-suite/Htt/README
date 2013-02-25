@@ -1,0 +1,21 @@
+===============================================================================
+
+                           Heap congruencer
+
+===============================================================================
+
+The file congruence.v contains the congruence algorithm for heaps.
+
+Requirements
+============
+
+- CoqEpsilon
+- ReleasedSsreflect
+
+
+Compilation
+===========
+
+$ coq_makefile *.v > Makefile
+$ make
+

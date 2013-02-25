@@ -1,0 +1,10 @@
+Lattice solver:
+  Implementation of a solver of inequalities over lattice formula. Based on the work of James and Hinze: http://www.cs.ox.ac.uk/people/daniel.james/lattice.html
+
+  Run:
+    Make sure that CoqEpsilon is installed. From the current folder:
+    ./configure.sh
+    make
+    coqide *.v -R . Lattice
+    
+    Examples are in Examples.v.
