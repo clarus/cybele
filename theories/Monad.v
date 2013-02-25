@@ -506,22 +506,6 @@ Module Monad.
         ret tt)
       tt.
   
-  (** Evaluate each action in the list from left to right
-      and collect the results. *)
-  Definition list_do (sig: Sig.t) (T: Type) (l: list (M sig T))
-    : M sig (list T) :=
-    fold_right (fun x l' =>
-      let! x := x in
-      let! l' := l' in
-      ret (x :: l'))
-      (ret nil) l.
-  
-  (** Apply an effectful function to each element of a list. *)
-  Definition list_iter (sig: Sig.t) (T: Type)
-    (f: T -> M sig unit) (l: list T): M sig unit :=
-    do! list_do (map f l) in
-    ret tt.
-  
   (** Return the content of [o] assuming it is not [None]. *)
   Definition extract_some (sig: Sig.t) (T: Type) (o: option T)
     : M sig T :=

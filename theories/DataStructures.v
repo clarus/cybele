@@ -5,15 +5,35 @@ Require Import Monad.
 
 Set Implicit Arguments.
 
-(** List map with index *)
-Definition mapi (A B: Type) (f: A -> nat -> B) (l: list A): list B :=
-  let fix aux (l: list A) (i: nat): list B :=
-    match l with
-    | nil => nil
-    | x :: l' => (f x i) :: (aux l' (S i))
-    end
-  in
-    aux l 0.
+Module List.
+  Import Monad.
+  
+  (** List map with index *)
+  Definition mapi (A B: Type) (f: A -> nat -> B) (l: list A): list B :=
+    let fix aux (l: list A) (i: nat): list B :=
+      match l with
+      | nil => nil
+      | x :: l' => (f x i) :: (aux l' (S i))
+      end
+    in
+      aux l 0.
+  
+  (** Evaluate each action in the list from left to right
+      and collect the results. *)
+  Definition do (sig: Sig.t) (T: Type) (l: list (M sig T))
+    : M sig (list T) :=
+    fold_right (fun x l' =>
+      let! x := x in
+      let! l' := l' in
+      ret (x :: l'))
+      (ret nil) l.
+  
+  (** Apply an effectful function to each element of a list. *)
+  Definition iter (sig: Sig.t) (T: Type)
+    (f: T -> M sig unit) (l: list T): M sig unit :=
+    do! do (map f l) in
+    ret tt.
+End List.
 
 (** A data structure for arrays implemented in the monad. *)
 (* FIXME: Implement it using a more efficient data structure. *)
@@ -48,7 +68,7 @@ Module Array.
   Definition map (sig: Sig.t) (T: Type) (array: t sig T)
     (f: T -> nat -> M sig T): M sig unit :=
     let! l := !array in
-    let! l := list_do (mapi f l) in
+    let! l := List.do (List.mapi f l) in
     array :=! l.
   
   (** Convert to a persistent list. *)

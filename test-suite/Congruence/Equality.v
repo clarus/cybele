@@ -61,7 +61,7 @@ Module UnionFind.
   Definition UnionFind (n: nat) (unions: list (nat * nat))
     : M (list nat) :=
     let! array := tmp_ref Sig 0 (seq 0 n) in
-    do! iter (fun (ij: nat * nat) _ =>
+    do! List.iter (fun (ij: nat * nat) =>
       let (i, j) := ij in
       Unify array i j)
       unions in
@@ -658,7 +658,7 @@ Module CongruenceClosure (P: Parameters).
         i :: j :: nil) eq_proofs) in
     let! hash := tmp_ref Sig 0 (Index.FMap.mapi (fun i _ =>
       EqProof.Make (i := i) (j := i) eq_refl) preds) in
-    do! do_list (List.map (Merge hash) eq_proofs) in
+    do! List.do (List.map (Merge hash) eq_proofs) in
     let! continue := tmp_ref Sig 1 true in
     do! while (fun _ => !continue) (fun _ =>
       let! b := TryMergeCongruent hash in
@@ -680,7 +680,7 @@ Module CongruenceClosure (P: Parameters).
       end in
     let! hash := tmp_ref Sig 0 (Index.FMap.mapi (fun i _ =>
       EqProof.Make (i := i) (j := i) eq_refl) preds) in
-    do! do_list (List.map (RecurseMerge hash get_preds) eq_proofs) in
+    do! List.do (List.map (RecurseMerge hash get_preds) eq_proofs) in
     ret hash.
   
   (** Compute the equality proof of two terms with congruence-closure *)
@@ -727,13 +727,6 @@ Module ExampleNoFun.
       nil);
     now unfold Values.AreEqual.
   Defined.
-  
-  Definition Eval (i j: nat) (nb_steps: nat) :=
-    ProveEqual eq_proofs i j (State.of_prophecy (Prophecy.of_nat Sig nb_steps)).
-  
-  Compute Eval 0 1 100.
-  Compute Eval 0 4 100.
-  Compute Eval 1 6 100.
   
   Lemma Eq1: Values.AreEqual P.Values 0 4.
     now apply (proof_by_reflection (ProveEqual eq_proofs 0 4)
@@ -790,7 +783,6 @@ Module ExampleCongruence.
     then true else false.
   
   Time Compute eval a a 1.
-  Print Opaque Dependencies eval.
   Time Compute eval fa a 100.
   Time Compute eval fa ffa 100.
   Time Compute eval a fa 100.
@@ -849,16 +841,6 @@ Module ExampleBig.
       EqProof.Make (i := gab) (j := a) _ ::
       nil); now unfold Values.AreEqual.
   Defined.
-  
-  Definition Eval (x y: Index.t) (nb_steps: nat) :=
-    ProveEqual eq_proofs x y (State.of_prophecy (Prophecy.of_nat Sig nb_steps)).
-  
-  Time Compute Eval a fa 100.
-  Time Compute Eval fa a 100.
-  Time Compute Eval a b 100.
-  Time Compute Eval fa ffa 100.
-  (*Time Compute Eval a ffa 100.*)
-  Time Compute Eval gab a 100.
   
   Definition Equal (i j: Index.t) :=
     proof_by_reflection (ProveEqual eq_proofs i j) (Prophecy.of_nat Sig 100).
