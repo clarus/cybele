@@ -863,6 +863,8 @@ Module ExampleBig.
 End ExampleBig.
 
 Module Certificate (P: Parameters).
+  Require Import Coqbottom.Reifiable.
+  
   Inductive t :=
   | proof: nat -> t
   | sym: t -> t
@@ -919,12 +921,44 @@ Module Certificate (P: Parameters).
       end));
     congruence.
   Defined.
+  
+  Import SExpr.
+  
+  Definition reifiable: Reifiable.t Certificate.t :=
+    Reifiable.New
+      (fix export c :=
+        let fix export_list cs :=
+          match cs with
+          | nil => I
+          | c :: cs' => B (export c) (export_list cs')
+          end in
+        match c with
+        | proof k => B I (Reifiable.Export Reifiable.Nat k)
+        | sym c' => B (B I I) (export c')
+        | trans c1 c2 => B (B I (B I I)) (B (export c1) (export c2))
+        | congruence f cs =>
+          B (B (B I I) I) (B (Reifiable.Export Reifiable.Nat f) (export_list cs))
+        end)
+      (fix import s :=
+        let fix import_list s :=
+          match s with
+          | I => nil
+          | B s1 s2 => import s1 :: import_list s2
+          end in
+        match s with
+        | B I s' => proof (Reifiable.Import Reifiable.Nat s')
+        | B (B I I) s' => sym (import s')
+        | B (B I (B I I)) (B s1 s2) => trans (import s1) (import s2)
+        | B _ (B s1 s2) => congruence (Reifiable.Import Reifiable.Nat s1) (import_list s2)
+        | _ => proof O
+        end).
 End Certificate.
 
 Module CongruenceClosureByCertificate (P: Parameters).
-  Definition T: Type := EqProof.t P.Values.
+  Module Certificate := Certificate P.
+  Definition T: Type := Index.t * Certificate.t.
   
-  Definition Sig: Sig.t := Sig.Make nil
+  (*Definition Sig: Sig.t := Sig.Make [] [].
     (Index.FMap.t T :: (bool: Type) :: nil).
   
   Definition Hash := Ref.t Sig (Index.FMap.t T).
@@ -1153,5 +1187,5 @@ Module CongruenceClosureByCertificate (P: Parameters).
     rewrite Hi'j' in Hii'.
     apply (eq_trans Hii').
     now apply eq_sym.
-  Defined.
+  Defined.*)
 End CongruenceClosureByCertificate.
