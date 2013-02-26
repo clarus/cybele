@@ -4,5 +4,9 @@
 
 # Compilation units
 ###################
-Equality.v
+Algo.v
+AlgoCertificate.v
+Definitions.v
+Examples.v
 FirstOrder.v
+UnionFind.v
