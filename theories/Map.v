@@ -74,47 +74,74 @@ Module ListMap (X : DecidableType) <: IMap.
   Definition equal := Map.equal.
 End ListMap.
 
-(*Module ListMap (X : DecidableType) <: IMap.
-  Require Import List.
-  Import ListNotations.
+(** Maps implemented using redefined lists to prevent universe inconsistencies *)
+Module BasicMap (X : DecidableType) <: IMap.
+  Require Import Arith.Peano_dec.
+  
+  Inductive list (A: Type): Type :=
+  | nil: list A
+  | cons: A -> list A -> list A.
   
   Definition key := X.t.
   Definition t (T: Type) := list (key * T).
   
-  Definition empty T := nil (A := T).
+  Definition empty (T: Type): t T := nil _.
   
   Fixpoint add (T: Type) (k: key) (x: T) (m: t T): t T :=
     match m with
-    | nil => (k, x) :: nil
-    | (k', x') :: m' =>
+    | nil _ => cons (k, x) (nil _)
+    | cons (k', x') m' =>
       if X.eq_dec k k'
-      then (k, x) :: m'
-      else (k', x') :: add k x m'
+      then cons (k, x) m'
+      else cons (k', x') (add k x m')
     end.
   
-  Fixpoint remove (T: Type) (k: key) (x: T) (m: t T): t T :=
+  Fixpoint remove (T: Type) (k: key) (m: t T): t T :=
     match m with
-    | nil => nil
-    | (k', x') :: m' =>
+    | nil _ => nil _
+    | cons (k', x) m' =>
       if X.eq_dec k k'
       then m'
-      else (k', x') :: remove k x m'
+      else cons (k', x) (remove k m')
     end.
   
   Fixpoint fold (T A: Type) (f: key -> T -> A -> A) (m: t T) (r: A): A :=
     match m with
-    | nil => r
-    | (k, x) :: m' => fold f m' (f k x r)
+    | nil _ => r
+    | cons (k, x) m' => fold f m' (f k x r)
     end.
   
-  Definition mapi (T T': Type) (f: key -> T -> T') (m: t T): t T' :=
-    map (fun kx => (fst kx, f (fst kx) (snd kx))) m.
-  
-  Parameter find (T: Type) (k: key) (m: t T): option T :=
+  Fixpoint mapi (T T': Type) (f: key -> T -> T') (m: t T): t T' :=
     match m with
-    | nil => None
-    | (k', x) :: m' =>
-      if X.eq_dec
-  Parameter cardinal: forall (T: Type), t T -> nat.
-  Parameter equal: forall (T: Type), (T -> T -> bool) -> t T -> t T -> bool.
-End ListMap.*)
+    | nil _ => nil _
+    | cons (k, x) m' => cons (k, f k x) (mapi f m')
+    end.
+  
+  Fixpoint find (T: Type) (k: key) (m: t T): option T :=
+    match m with
+    | nil _ => None
+    | cons (k', x) m' =>
+      if X.eq_dec k k'
+      then Some x
+      else find k m'
+    end.
+  
+  Fixpoint cardinal (T: Type) (m: t T): nat :=
+    match m with
+    | nil _ => O
+    | cons _ m' => S (cardinal m')
+    end.
+  
+  Definition equal (T: Type) (eq_dec: T -> T -> bool) (m1 m2: t T): bool :=
+    if eq_nat_dec (cardinal m1) (cardinal m2) then
+      fold (fun k x (r: bool) =>
+        if r then
+          match find k m2 with
+          | None => false
+          | Some x' => eq_dec x x'
+          end
+        else
+          false) m1 true
+    else
+      false.
+End BasicMap.
