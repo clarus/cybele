@@ -5,6 +5,7 @@
 # Compilation units
 ###################
 Algo.v
+AlgoBool.v
 AlgoCertificate.v
 Definitions.v
 Examples.v

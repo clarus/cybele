@@ -102,13 +102,14 @@ Module Certificate (P: Parameters).
         end).
 End Certificate.
 
-(*Module CongruenceClosureByCertificate (P: Parameters).
+Module CongruenceClosureByCertificate (P: Parameters).
   Require Import Coqbottom.Reifiable.
   
   Module Certificate := Certificate P.
   Definition T: Type := Index.t * Certificate.t.
   
-  Module ReifiableIndexMap := Reifiable.Map Index.FMap.
+  (* Universe inconsistency *)
+  (*Module ReifiableIndexMap := Reifiable.Map Index.FMap.
   
   Definition Sig: Sig.t := Sig.Make [] [].
     (Index.FMap.t T :: (bool: Type) :: nil).
@@ -339,5 +340,5 @@ End Certificate.
     rewrite Hi'j' in Hii'.
     apply (eq_trans Hii').
     now apply eq_sym.
-  Defined.
-End CongruenceClosureByCertificate.*)
+  Defined.*)
+End CongruenceClosureByCertificate.

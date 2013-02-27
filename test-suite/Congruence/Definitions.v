@@ -81,6 +81,18 @@ Module Index.
       end in
     (aux, auxs).
   
+  (** If two indexes are equal *)
+  Fixpoint eqb (x y: Index.t): bool :=
+    let fix eqbs (xs ys: list Index.t): bool :=
+      match (xs, ys) with
+      | (nil, nil) => true
+      | (x :: xs', y :: ys') => andb (eqb x y) (eqbs xs' ys')
+      | _ => false
+      end in
+    match (x, y) with
+    | (Make i xs, Make j ys) => andb (NPeano.Nat.eqb i j) (eqbs xs ys)
+    end.
+  
   (** Decidability of equality on indexes *)
   Module MiniOrdered <: MiniOrderedType.
     Definition t := t.

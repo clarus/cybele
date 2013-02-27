@@ -9,7 +9,6 @@ Require Import Coqbottom.
 Require Import Coqbottom.Map.
 Require Import Coqbottom.DataStructures.
 Require Import Definitions.
-Require Import Algo.
 
 Set Implicit Arguments.
 Set Transparent Obligation.
@@ -17,6 +16,8 @@ Import Monad ListNotations.
 
 (** Example with only constants *)
 Module ExampleNoFun.
+  Require Import Algo.
+  
   Module P <: Parameters.
     Definition T := nat.
     Definition Values :=
@@ -54,6 +55,8 @@ End ExampleNoFun.
 
 (** Small example relying on congruence *)
 Module ExampleCongruence.
+  Require Import Algo.
+  
   Module P <: Parameters.
     Definition T := nat.
     
@@ -130,9 +133,6 @@ Module ExampleBig.
       nil.
   End P.
   
-  Module CC := CongruenceClosure P.
-  Import CC.
-  
   Definition a := Index.Make 0 nil.
   Definition b := Index.Make 1 nil.
   Definition fa := Index.Make 2 (a :: nil).
@@ -141,36 +141,88 @@ Module ExampleBig.
   Definition gbfa := Index.Make 3 (b :: fa :: nil).
   Definition ffa := Index.Make 2 (fa :: nil).
   
+  Fixpoint f_n_a (n: nat) :=
+    match n with
+    | O => a
+    | S n' => Index.Make 2 [f_n_a n']
+    end.
+  
   Check eq_refl: Values.NthIndex P.Values a = Some 3.
   Check eq_refl: Values.NthIndex P.Values fa = Some 3.
   Check eq_refl: Values.NthIndex P.Values ffa = Some 3.
   Check eq_refl: Values.NthIndex P.Values fgba = Some 3.
   
-  Definition eq_proofs: list T.
-    refine (
-      EqProof.Make (i := a) (j := fa) _ ::
-      EqProof.Make (i := gab) (j := fgba) _ ::
-      EqProof.Make (i := gbfa) (j := ffa) _ ::
-      EqProof.Make (i := gab) (j := a) _ ::
-      nil); now unfold Values.AreEqual.
-  Defined.
+  Module GenerateProofs.
+    Require Import Algo.
+    Module CC := CongruenceClosure P.
+    Import CC.
+    
+    Definition eq_proofs: list T.
+      refine (
+        EqProof.Make (i := a) (j := fa) _ ::
+        EqProof.Make (i := gab) (j := fgba) _ ::
+        EqProof.Make (i := gbfa) (j := ffa) _ ::
+        EqProof.Make (i := gab) (j := a) _ ::
+        nil); now unfold Values.AreEqual.
+    Defined.
+    
+    Definition compute (i j: Index.t): bool :=
+      is_computable (ProveEqual eq_proofs i j) (Prophecy.of_nat Sig 100).
+    
+    Time Compute compute a fa.
+    Time Compute compute gab a.
+    Time Compute compute (f_n_a 200) a.
+    
+    Definition equal (i j: Index.t) :=
+      proof_by_reflection (ProveEqual eq_proofs i j) (Prophecy.of_nat Sig 100).
+    
+    Time Check equal a a eq_refl.
+    Time Check equal a fa eq_refl.
+    Time Check equal a ffa eq_refl.
+    Time Fail Check equal a b eq_refl.
+    Time Check equal gab a eq_refl.
+    
+    Lemma Eq1: Values.AreEqual P.Values a ffa.
+      apply (proof_by_reflection (ProveEqual eq_proofs a ffa)
+        (Prophecy.of_nat Sig 100)).
+      now vm_compute.
+    Defined.
+    
+    Lemma Eq2: Values.AreEqual P.Values gab a.
+      apply (proof_by_reflection (ProveEqual eq_proofs gab a)
+        (Prophecy.of_nat Sig 100)).
+      now vm_compute.
+    Defined.
+  End GenerateProofs.
   
-  Definition Equal (i j: Index.t) :=
-    proof_by_reflection (ProveEqual eq_proofs i j) (Prophecy.of_nat Sig 100).
-  
-  Time Check Equal a a eq_refl.
-  Time Check Equal a fa eq_refl.
-  Time Check Equal a ffa eq_refl.
-  Time Fail Check Equal a b eq_refl.
-  Time Check Equal gab a eq_refl.
-  
-  Lemma Eq1: Values.AreEqual P.Values a ffa.
-    now apply (proof_by_reflection (ProveEqual eq_proofs a ffa)
-      (Prophecy.of_nat Sig 100)).
-  Defined.
-  
-  Lemma Eq2: Values.AreEqual P.Values gab a.
-    now apply (proof_by_reflection (ProveEqual eq_proofs gab a)
-      (Prophecy.of_nat Sig 100)).
-  Defined.
+  Module JustDecide.
+    Require Import AlgoBool.
+    Module CC := CongruenceClosureBool P.
+    Import CC.
+    
+    Definition eq_proofs: list T.
+      refine (
+        EqProof.Make (i := a) (j := fa) _ ::
+        EqProof.Make (i := gab) (j := fgba) _ ::
+        EqProof.Make (i := gbfa) (j := ffa) _ ::
+        EqProof.Make (i := gab) (j := a) _ ::
+        nil); now unfold Values.AreEqual.
+    Defined.
+    
+    Definition compute (i j: Index.t): bool :=
+      is_computable (ProveEqual eq_proofs i j) (Prophecy.of_nat Sig 100).
+    
+    Time Compute compute a fa.
+    Time Compute compute gab a.
+    Time Compute compute (f_n_a 200) a.
+    
+    Definition equal (i j: Index.t) :=
+      proof_by_reflection (ProveEqual eq_proofs i j) (Prophecy.of_nat Sig 100).
+    
+    Time Check equal a a eq_refl.
+    Time Check equal a fa eq_refl.
+    Time Check equal a ffa eq_refl.
+    Time Fail Check equal a b eq_refl.
+    Time Check equal gab a eq_refl.
+  End JustDecide.
 End ExampleBig.
