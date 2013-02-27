@@ -176,39 +176,6 @@ Module CongruenceClosure (P: Parameters).
         ret false)
       Pij.
   
-  (** Do a merge in [hash] if they are still some congruent values *)
-  Definition TryMergeCongruent (hash: Hash): M bool :=
-    let! r := tmp_ref Sig 1 false in
-    do!
-      iter hash (fun x _ =>
-      iter hash (fun y _ =>
-        let! OPxy := AreCongruent hash (x, y) in
-        match OPxy with
-        | Some Pxy =>
-          let! b := Merge hash (EqProof.Make Pxy) in
-          if b
-          then r :=! true
-          else ret tt
-        | None => ret tt
-       end)) in
-     !r.
-  
-  (** Merge congruent values until a fixpoint is reached (slow version) *)
-  Definition CongruenceClosureNaive  (eq_proofs: list T)
-    (other_indexes: list Index.t): M Hash :=
-    let preds :=
-      Index.Preds (other_indexes ++ flat_map (fun (P: T) =>
-        let (i, j, _) := P in
-        i :: j :: nil) eq_proofs) in
-    let! hash := tmp_ref Sig 0 (Index.FMap.mapi (fun i _ =>
-      EqProof.Make (i := i) (j := i) eq_refl) preds) in
-    do! List.do (List.map (Merge hash) eq_proofs) in
-    let! continue := tmp_ref Sig 1 true in
-    do! while (fun _ => !continue) (fun _ =>
-      let! b := TryMergeCongruent hash in
-      continue :=! b) in
-    ret hash.
-  
   (** Generate the congruent relation given a list of equalities and
       other involved terms *)
   Definition CongruenceClosure (eq_proofs: list T) (other_indexes: list Index.t)
