@@ -32,16 +32,18 @@ Set Extraction AccessOpaque.
     can be very slow with the full Map library. *)
 Lemma easy: forall x y, x /*\ y <= y \*/ x.
   intros; Reify Only.
-  now apply (proof_by_reflection (ProveLeq false (term1, term2))
+  apply (proof_by_reflection (ProveLeq false (term1, term2))
     (Prophecy.of_nat Sig 100)).
+  now vm_compute.
 Defined.
 
 Lemma median: forall x y z,
   (x /*\ y) \*/ (y /*\ z) \*/ (z /*\ x) <=
   (x \*/ y) /*\ (y \*/ z) /*\ (z \*/ x).
   intros; Reify Only.
-  now apply (proof_by_reflection (ProveLeq false (term1, term2))
+  apply (proof_by_reflection (ProveLeq false (term1, term2))
     (Prophecy.of_nat Sig 100)).
+  now vm_compute.
 Defined.
 
 
@@ -51,7 +53,8 @@ Definition gas := 10000.
 
 Ltac solve_without_ocaml term1 term2 :=
   apply (proof_by_reflection (ProveLeq false (term1, term2))
-    (Prophecy.of_nat Sig gas)).
+    (Prophecy.of_nat Sig gas));
+  vm_compute.
 
 (** *** Exponential cases. *)
 
