@@ -10,19 +10,21 @@ Set Implicit Arguments.
 Set Transparent Obligation.
 Import Monad ListNotations.
 
+(** Decide if two elements are equivalent according to some known equivalence properties *)
 Section EquivalenceDecision.
   Variable T : Type.
   Variable R : relation T.
   Variable Hequiv : equivalence _ R.
   Variable eq_dec : forall x y : T, { x = y } + { x <> y }.
-  
   Infix "~" := R (at level 70, no associativity).
   
+  (** An [equality] is a proof of equivalence plus these two equivalent elements *)
   Definition equality := {ij : T * T | fst ij ~ snd ij}.
   Definition equalities := list equality.
   Definition s : Sig.t := Sig.Make nil [equalities].
   Definition M := M s.
   
+  (** Read in an equality list *)
   Fixpoint read (eqs : equalities) (i : T) {struct eqs} : option {j : T | i ~ j}.
     refine (
       match eqs with
@@ -35,6 +37,7 @@ Section EquivalenceDecision.
     congruence.
   Defined.
   
+  (** Write in an equality list; add a new element if [i] is not found *)
   Fixpoint write (eqs : equalities) (i : T) (Pj : {j : T | i ~ j}) : equalities.
     refine (
       match eqs with
@@ -51,7 +54,8 @@ Section EquivalenceDecision.
     trivial.
   Defined.
   
-  (** The representative of [i] *)
+  (** Find the representative of [i]; add the equivalence of [i] with [i]
+      if [i] is not in [r] *)
   Definition find (r : Ref.t s equalities) (i : T) : M {j : T | i ~ j}.
     refine (
       dependent_fix (fun i => {j : T | i ~ j}) (fun aux i =>
@@ -75,7 +79,7 @@ Section EquivalenceDecision.
     now apply (equiv_refl _ _ Hequiv).
   Defined.
   
-  (** Merge two equivalent classes to validate [eq] *)
+  (** Merge two equivalent classes according to [eq] *)
   Definition unify (r : Ref.t s equalities) (eq : equality) : M unit.
     refine (
       let (ij, Hij) := eq in
@@ -91,6 +95,7 @@ Section EquivalenceDecision.
       now apply (equiv_trans _ _ Hequiv _ (snd ij)).
   Defined.
   
+  (** Decide if [i] and [j] are equivalent doing an union-find *)
   Definition decide (known_eqs : equalities) (i j : T) : M (i ~ j).
     refine (
       let! r := tmp_ref s 0 nil in
@@ -112,7 +117,8 @@ Section EquivalenceDecision.
   Defined.
 End EquivalenceDecision.
 
-Module Examples.
+(** An example with arithmetic formulæ *)
+Module Example.
   Inductive t :=
   | const : nat -> t
   | add : t -> t -> t.
@@ -138,31 +144,46 @@ Module Examples.
     now simpl.
   Qed.
   
-  Fixpoint add_n_zero (c n : nat) : t :=
+  Fixpoint add_n_zero e n : t :=
     match n with
-    | O => const c
-    | S n' => add (add_n_zero c n') (const 0)
+    | O => e
+    | S n' => add (add_n_zero e n') (const 0)
     end.
   
-  Definition known_eqs (c n : nat) : equalities R.
+  Definition known_eqs (e : t) (n : nat) : equalities R.
     refine (
       map (fun i =>
-        exist _ (add_n_zero c i, add_n_zero c (S i)) _)
+        exist _ (add_n_zero e i, add_n_zero e (S i)) _)
         (seq 0 n)).
     simpl.
     now apply equiv_add_zero.
   Defined.
   
-  Compute known_eqs 10.
-  
   Definition decide_bool known_eqs e1 e2 nb_steps : bool :=
     is_computable (decide Hequiv t_eq_dec known_eqs e1 e2)
       (Prophecy.of_nat _ nb_steps).
   
-  Compute decide_bool (known_eqs 12 10) (add_n_zero 12 0) (add_n_zero 12 8) 100.
-  Compute decide_bool (known_eqs 12 100) (add_n_zero 12 0) (add_n_zero 12 100) 1000.
-  Compute decide_bool (known_eqs 12 100) (add_n_zero 12 0) (add_n_zero 12 101) 1000.
-  Compute decide_bool (known_eqs 23 100) (add_n_zero 12 0) (add_n_zero 12 101) 1000.
-  Compute decide_bool (known_eqs 12 100 ++ known_eqs 23 100)
-    (add_n_zero 23 0) (add_n_zero 23 100) 1000.
-End Examples.
+  Definition four := const 4.
+  Definition ten := const 10.
+  Definition ten' := add (const 5) (const 5).
+  
+  Definition eq_ten_ten' : equality R.
+    exists (ten, ten').
+    unfold R; now simpl.
+  Defined.
+  
+  Compute decide_bool (known_eqs four 10)
+    (add_n_zero four 0) (add_n_zero four 8) 100.
+  
+  Compute decide_bool (known_eqs four 100)
+    (add_n_zero four 0) (add_n_zero four 100) 1000.
+  Compute decide_bool (known_eqs four 100)
+    (add_n_zero four 0) (add_n_zero four 101) 1000.
+  Compute decide_bool (known_eqs ten 100)
+    (add_n_zero four 0) (add_n_zero four 100) 1000.
+  
+  Compute decide_bool (known_eqs ten 100 ++ known_eqs ten' 100)
+    (add_n_zero ten 0) (add_n_zero ten' 100) 1000.
+  Compute decide_bool (eq_ten_ten' :: known_eqs ten 100 ++ known_eqs ten' 100)
+    (add_n_zero ten 0) (add_n_zero ten' 100) 1000.
+End Example.
