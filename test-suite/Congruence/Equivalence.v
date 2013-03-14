@@ -1,4 +1,4 @@
-(** Solve goals by the transitivity of the equality *)
+(** Solve goals about equivalences *)
 Require Import Arith.Peano_dec.
 Require Import String.
 Require Import List.
