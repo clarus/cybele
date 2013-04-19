@@ -2,8 +2,8 @@
 Require Import Arith.Peano_dec.
 Require Import String.
 Require Import List.
-Require Import Coqbottom.
-Require Import Coqbottom.DataStructures.
+Require Import Cybele.
+Require Import Cybele.DataStructures.
 
 Set Implicit Arguments.
 Set Transparent Obligation.

@@ -1,9 +1,9 @@
 (** Congruence closure *)
 Require Import Arith.Peano_dec.
 Require Import List.
-Require Import Coqbottom.
-Require Import Coqbottom.Map.
-Require Import Coqbottom.DataStructures.
+Require Import Cybele.
+Require Import Cybele.Map.
+Require Import Cybele.DataStructures.
 Require Import Definitions.
 
 Set Implicit Arguments.
@@ -11,7 +11,7 @@ Set Transparent Obligation.
 Import Monad ListNotations.
 
 Module Certificate (P: Parameters).
-  Require Import Coqbottom.Reifiable.
+  Require Import Cybele.Reifiable.
   
   Inductive t :=
   | proof: nat -> t
@@ -103,7 +103,7 @@ Module Certificate (P: Parameters).
 End Certificate.
 
 Module CongruenceClosureByCertificate (P: Parameters).
-  Require Import Coqbottom.Reifiable.
+  Require Import Cybele.Reifiable.
   
   Module Certificate := Certificate P.
   Definition T: Type := Index.t * Certificate.t.

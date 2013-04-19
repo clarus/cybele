@@ -15,5 +15,5 @@ val observe_recursive_call : unit -> unit
 (** Register an input reference *)
 val register_input_ref : int -> (unit -> sexpr) -> unit
 
-(** Exhibit the prophecy hidden in the state of Coqbottom. *)
+(** Exhibit the prophecy hidden in the state of Cybele. *)
 val prophecy : Term.constr -> Term.constr

@@ -2,9 +2,9 @@ Require Import Arith.
 Require Import OrderedType.
 Require Import OrderedTypeEx.
 Require Import Lattice.
-Require Import Coqbottom.
-Require Import Coqbottom.Map.
-Require Import Coqbottom.Reifiable.
+Require Import Cybele.
+Require Import Cybele.Map.
+Require Import Cybele.Reifiable.
 
 Import Lattice Monad.
 

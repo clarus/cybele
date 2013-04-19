@@ -12,7 +12,7 @@
     triggerring the evaluation of the monadic computation.
 
     The communication between the compiled code and the plugin is
-    implemented by the module {!CoqbottomState}.
+    implemented by the module {!CybeleState}.
 *)
 
 open Tacmach
@@ -25,9 +25,9 @@ open Declare
 (** [define c] introduces a fresh constant name for the term [c]. *)
 let define c =
   let fresh_name =
-  (** We will use the string "coqbottom" as a prefix to name the
+  (** We will use the string "cybele" as a prefix to name the
       monadic computation we want to compile. *)
-    let base = Names.id_of_string "coqbottom" in
+    let base = Names.id_of_string "cybele" in
 
   (** [is_visible_name id] returns [true] if [id] is already
       used on the Coq side. *)
@@ -56,7 +56,7 @@ let define c =
 (** [command s] runs [s] and logs the exit status. *)
 let command s =
   let ret = Sys.command s in
-  Pp.msg_info (Pp.str (Printf.sprintf "Coqbottom [%d]: %s\n" ret s))
+  Pp.msg_info (Pp.str (Printf.sprintf "Cybele [%d]: %s\n" ret s))
 
 let cleanup fname =
   command (Printf.sprintf "rm %s" fname)
@@ -79,16 +79,16 @@ let time l f =
 
 (** {1 Compilation} *)
 
-(** Use site configuration to determine where Coqbottom
+(** Use site configuration to determine where Cybele
     is installed. *)
 let coqlib =
   let coqlib =
     Envars.coqlib (fun _ ->
       Errors.error
-        "Coqbottom: unable to obtain information about the site configuration."
+        "Cybele: unable to obtain information about the site configuration."
     )
   in
-  Filename.concat (Filename.concat coqlib "user-contrib") "Coqbottom"
+  Filename.concat (Filename.concat coqlib "user-contrib") "Cybele"
 
 (** Use site configuration to use the right ocaml native compilers. *)
 let ocamlopt = Envars.ocamlopt ()
@@ -113,7 +113,7 @@ let compile c =
     (** Name [c]. *)
     let constant = define c in
     (** Extract [c] in a file and all its dependencies. *)
-    let tmp      = Filename.temp_file "coqbottom" ".ml" in
+    let tmp      = Filename.temp_file "cybele" ".ml" in
     let tmp_intf = Filename.chop_extension tmp ^ ".mli" in
     time "the extraction" (fun () -> 
       Extract_env.full_extraction (Some tmp) [
@@ -126,7 +126,7 @@ let compile c =
   and ocaml_compiler fname =
     (** Use a temporary file for the compiled module. *)
     let compiled_module =
-      let basename = Filename.temp_file "coqbottom_dyn" "" in
+      let basename = Filename.temp_file "cybele_dyn" "" in
       fun ext -> basename ^ "." ^ ext 
     in
     (** Compile using the right compiler. *)
@@ -146,7 +146,7 @@ let compile c =
       let target = compiled_module "cmo" in
       time "the compilation of the ocaml code" (fun () ->
 	command (Printf.sprintf 
-		   "%s -rectypes -c -linkall -I %s -o %s %s/coqbottomPlugin.cma %s"
+		   "%s -rectypes -c -linkall -I %s -o %s %s/cybelePlugin.cma %s"
 		   ocamlc coqlib target coqlib fname);
 	(target, [target]))
     )
@@ -160,7 +160,7 @@ let dynload f =
   try
     Dynlink.loadfile f
   with Dynlink.Error e ->
-    Errors.error ("Coqbottom (during compiled code loading):"
+    Errors.error ("Cybele (during compiled code loading):"
 		   ^ (Dynlink.error_message e))
 
 (* FIXME: Implement a sanity check to make sure that dynamic

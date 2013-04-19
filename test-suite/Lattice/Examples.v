@@ -1,7 +1,7 @@
 Require Import NPeano.
 Require Import Lattice.
 Require Import Algo.
-Require Import Coqbottom.
+Require Import Cybele.
 Import Monad.
 
 (** * Lattices examples *)

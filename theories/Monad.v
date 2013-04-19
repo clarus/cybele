@@ -398,7 +398,7 @@ Module Monad.
   Extract Constant dependent_fix => "
     let rec fix f =
       fun x ->
-        CoqbottomState.observe_recursive_call ();
+        CybeleState.observe_recursive_call ();
         f (fix f) x
     in fun _ -> fix".
   
@@ -443,11 +443,11 @@ Module Monad.
       | O -> 0
       | S n' -> 1 + int_of_nat n' in
     let rec ocaml_sexpr_of_sexpr = function
-      | SExpr.I -> CoqbottomState.I
-      | SExpr.B (r1, r2) -> CoqbottomState.B
+      | SExpr.I -> CybeleState.I
+      | SExpr.B (r1, r2) -> CybeleState.B
         (ocaml_sexpr_of_sexpr r1, ocaml_sexpr_of_sexpr r2) in
     let r = ref init in
-    CoqbottomState.register_input_ref
+    CybeleState.register_input_ref
       (int_of_nat index) (fun () -> ocaml_sexpr_of_sexpr (getter r));
     r".
   

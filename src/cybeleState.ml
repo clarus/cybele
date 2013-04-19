@@ -2,7 +2,7 @@
     as a communication medium between the plugin and the dynamically
     compiled code. *)
 
-open CoqbottomConstants
+open CybeleConstants
 
 type sexpr =
   | I

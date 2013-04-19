@@ -1,45 +1,45 @@
 # Includes
 ##########
 -I src
--R theories Coqbottom
+-R theories Cybele
 
 ## Targets
 ##########
-CMX_TARGETS = "src/coqbottomConstants.cmx \
-            src/coqbottomState.cmx \
-	    src/coqbottomDynamicCompilation.cmx \
-	    src/coqbottom.cmx \
-	    src/coqbottomPluginModule.cmx"
+CMX_TARGETS = "src/cybeleConstants.cmx \
+            src/cybeleState.cmx \
+	    src/cybeleDynamicCompilation.cmx \
+	    src/cybele.cmx \
+	    src/cybelePluginModule.cmx"
 
 CMO_TARGETS = $(CMX_TARGETS:.cmx=.cmo)
 
 # Native compilation options
 ############################
 OPT_OPTIONS = "$(CAMLOPTLINK) $(ZDEBUG) $(ZFLAGS) -shared -o $@ $^"
--custom $(OPT_OPTIONS) $(CMX_TARGETS) src/coqbottomPlugin.cmxs
+-custom $(OPT_OPTIONS) $(CMX_TARGETS) src/cybelePlugin.cmxs
 
 # Bytecode compilation options
 ##############################
--custom "$(CAMLLINK) -g -a -o $@ $^" $(CMO_TARGETS) src/coqbottomPlugin.cma
+-custom "$(CAMLLINK) -g -a -o $@ $^" $(CMO_TARGETS) src/cybelePlugin.cma
 
 # Custom variables
 ##################
-COQEPLUGIN = "src/coqbottomPlugin.cma"
-COQEPLUGINOPT = "src/coqbottomPlugin.cmxs"
+COQEPLUGIN = "src/cybelePlugin.cma"
+COQEPLUGINOPT = "src/cybelePlugin.cmxs"
 COQDOC = "$(COQBIN)coqdoc -interpolate -utf8"
 CAMLP4OPTIONS = "-loc loc"
 
 # Compilation units
 ###################
-src/coqbottomConstants.ml
-src/coqbottomState.mli
-src/coqbottomState.ml
-src/coqbottomDynamicCompilation.mli
-src/coqbottomDynamicCompilation.ml
-src/coqbottom.ml4
-src/coqbottomPluginModule.ml
-src/coqbottomPlugin.mllib
-theories/Coqbottom.v
+src/cybeleConstants.ml
+src/cybeleState.mli
+src/cybeleState.ml
+src/cybeleDynamicCompilation.mli
+src/cybeleDynamicCompilation.ml
+src/cybele.ml4
+src/cybelePluginModule.ml
+src/cybelePlugin.mllib
+theories/Cybele.v
 theories/DataStructures.v
 theories/Map.v
 theories/Memoization.v

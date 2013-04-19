@@ -5,9 +5,9 @@ Require Import String.
 Require Import List.
 Require Import OrderedType.
 Require Import FSetAVL.
-Require Import Coqbottom.
-Require Import Coqbottom.Map.
-Require Import Coqbottom.DataStructures.
+Require Import Cybele.
+Require Import Cybele.Map.
+Require Import Cybele.DataStructures.
 Require Import Definitions.
 
 Set Implicit Arguments.

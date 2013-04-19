@@ -1,10 +1,10 @@
 (** This module stores the references to the Coq's namespace. *)
 
-let message = "Coqbottom"
+let message = "Cybele"
 let lookup  = Coqlib.gen_constant_in_modules message
 
 module SExpr = struct
-  let constant = lookup [["Coqbottom"; "Reifiable"; "SExpr"]]
+  let constant = lookup [["Cybele"; "Reifiable"; "SExpr"]]
   
   let t          = lazy (constant "t")
   
@@ -13,14 +13,14 @@ module SExpr = struct
 end
 
 module Prophecy = struct
-  let constant = lookup [["Coqbottom"; "Monad"; "Prophecy"]]
+  let constant = lookup [["Cybele"; "Monad"; "Prophecy"]]
   
   let of_nat        = lazy (constant "of_nat")
   let of_sexprs     = lazy (constant "of_sexprs")
 end
 
 module Monad = struct
-  let constant = lookup [["Coqbottom"; "Monad"; "Monad"]]
+  let constant = lookup [["Cybele"; "Monad"; "Monad"]]
   
   let t                      = lazy (constant "M")
   

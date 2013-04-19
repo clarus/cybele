@@ -2,9 +2,9 @@ Require Import Arith.
 Require Import OrderedTypeEx.
 Require Import FMapAVL.
 Require Import FMapInterface.
-Require Import Coqbottom.
-Require Import Coqbottom.Reifiable.
-Require Import Coqbottom.Memoization.
+Require Import Cybele.
+Require Import Cybele.Reifiable.
+Require Import Cybele.Memoization.
 Import Monad.
 
 Module NatMap := FMapAVL.Make Nat_as_OT.
