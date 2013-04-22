@@ -406,7 +406,7 @@ Module Algo (P: Param).
     set (env := env_);
     change (Eval term1_ env <= Eval term2_ env);
     generalize env;
-    coq (ProveLeq true (term1_, term2_)).
+    cybele (ProveLeq true (term1_, term2_)).
 
   (** A continuation to [Reify] to call the [coq] tactic using [ProveLeqMemo]. *)
   (*
@@ -414,6 +414,6 @@ Module Algo (P: Param).
     set (env := env_);
     change (Eval term1_ env <= Eval term2_ env);
     generalize env;
-    coq (ProveLeqMemo true (term1_, term2_)).
+    cybele (ProveLeqMemo true (term1_, term2_)).
    *)
 End Algo.

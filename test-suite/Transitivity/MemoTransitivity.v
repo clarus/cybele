@@ -261,10 +261,10 @@ Ltac reify_formula f :=
 
 Ltac decide_goal_formula :=
   match goal with | |- ?G => 
-     let f := reify_formula G in coq (TNat.decide f) 
+     let f := reify_formula G in cybele (TNat.decide f) 
   end.
 
-(* FIXME: Benchmark each step of the 'coq' tactic, because I find it too slow. *)
+(* FIXME: Benchmark each step of the 'cybele' tactic, because I find it too slow. *)
 Example f1 : (0 <= 1 -> 0 <= 1). decide_goal_formula. Defined.
 Example f2 : (0 <= 1 /\ 1 <= 2) -> 0 <= 2. decide_goal_formula. Defined.
 Example f3 : (0 <= 1 /\ 1 <= 2 /\ 2 <= 3) -> 0 <= 3. decide_goal_formula. Defined.

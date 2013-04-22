@@ -54,7 +54,7 @@ let cybele c env =
   refine proof env
 
 (** Syntax extension for our tactic. *)
-TACTIC EXTEND coq
-| [ "coq" constr(c) ] -> [ cybele c ]
+TACTIC EXTEND cybele
+| [ "cybele" constr(c) ] -> [ cybele c ]
 END
 

@@ -13,7 +13,7 @@ Definition sum (n m: nat): M sig1 nat :=
 Compute sum 2 3 (State.of_prophecy (Prophecy.of_nat sig1 0)).
 
 Lemma sum1: nat.
-  coq (sum 2 3).
+  cybele (sum 2 3).
 Defined.
 Print sum1.
 
@@ -25,6 +25,6 @@ Definition input: M sig2 nat :=
   !s.
 
 Lemma input1: nat.
-  coq input.
+  cybele input.
 Defined.
 Print input1.

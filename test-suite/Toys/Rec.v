@@ -33,11 +33,11 @@ Definition fact: nat -> M sig nat :=
 Set Extraction AccessOpaque.
 
 (*Lemma fact1: nat.
-  coq (fact 1).
+  cybele (fact 1).
 Defined.
 Print fact1.
 
-Lemma fact2: nat. coq (fact 5). Defined. Print fact2.*)
+Lemma fact2: nat. cybele (fact 5). Defined. Print fact2.*)
 
 Module NatMemo := InputMemo NatMap.
 
@@ -47,7 +47,7 @@ Definition memo_fact: nat -> M sig nat :=
   NatMemo.memoize memo fact.
 
 Lemma fact3: nat * nat.
-  coq (
+  cybele (
     let! n1 := memo_fact 3 in
     let! n2 := memo_fact 5 in
     ret (n1, n2)).
@@ -62,7 +62,7 @@ Definition eval_fact: nat -> M sig nat :=
 
 (** Factorial with trace pre-evaluation *)
 Lemma fact4: nat * nat.
-  coq (
+  cybele (
     let! n1 := eval_fact 3 in
     let! n2 := eval_fact 5 in
     ret (n1, n2)).
