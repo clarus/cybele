@@ -67,11 +67,11 @@ let patch_ocaml_file file_name patch =
   close_out channel
 
 (** [time l f] runs [f ()] displaying its running time. *)
-let time l f = 
+let time l f =
   let start = System.get_time () in
   let y = f () in
-  let stop = System.get_time () in 
-  Pp.msg_info (Pp.str 
+  let stop = System.get_time () in
+  Pp.msg_info (Pp.str
 		 (Printf.sprintf "Running time of the %s: %f secs\n"
 		    l
 		    (System.time_difference start stop)));
@@ -82,13 +82,7 @@ let time l f =
 (** Use site configuration to determine where Cybele
     is installed. *)
 let coqlib =
-  let coqlib =
-    Envars.coqlib (fun _ ->
-      Errors.error
-        "Cybele: unable to obtain information about the site configuration."
-    )
-  in
-  Filename.concat (Filename.concat coqlib "user-contrib") "Cybele"
+  Filename.concat (Filename.concat (Envars.coqlib ()) "user-contrib") "Cybele"
 
 (** Use site configuration to use the right ocaml native compilers. *)
 let ocamlopt = Envars.ocamlopt ()
@@ -173,6 +167,8 @@ let sanity_check () =
 (** The oracle compilation and execution. *)
 let compile_and_run_oracle c =
   sanity_check ();
+  let c = Future.from_val (c, Declareops.no_seff) in
   let dyncode, files = compile c in
   time "the extracted code" (fun () -> dynload dyncode);
   List.iter cleanup files
+
