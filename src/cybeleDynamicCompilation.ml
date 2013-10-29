@@ -33,8 +33,8 @@ let define c =
       used on the Coq side. *)
     let is_visible_name id =
       try
-	ignore (Nametab.locate (Libnames.qualid_of_ident id));
-	true
+        ignore (Nametab.locate (Libnames.qualid_of_ident id));
+        true
       with Not_found -> false
     in
     (** Safe fresh name generation. *)
@@ -43,11 +43,11 @@ let define c =
   ignore (
     declare_constant ~internal:KernelVerbose fresh_name
       (DefinitionEntry {
-	const_entry_body = c;
-	const_entry_secctx = None;
-	const_entry_type = None;
-	const_entry_opaque = false;
-	const_entry_inline_code = false (* apparently added in recent version *)
+        const_entry_body = c;
+        const_entry_secctx = None;
+        const_entry_type = None;
+        const_entry_opaque = false;
+        const_entry_inline_code = false
        },
        Decl_kinds.IsDefinition Decl_kinds.Definition)
   );
@@ -72,9 +72,9 @@ let time l f =
   let y = f () in
   let stop = System.get_time () in 
   Pp.msg_info (Pp.str 
-		 (Printf.sprintf "Running time of the %s: %f secs\n"
-		    l
-		    (System.time_difference start stop)));
+                 (Printf.sprintf "Running time of the %s: %f secs\n"
+                    l
+                    (System.time_difference start stop)));
   y
 
 (** {1 Compilation} *)
@@ -101,11 +101,11 @@ let ocamlc = Envars.ocamlc ()
 let compile c =
   let rec compile () =
     (** The compilation is the composition of the Coq extraction
-	with the compilation from ocaml to the right low-level
-	plateform (native or bytecode).
+        with the compilation from ocaml to the right low-level
+        plateform (native or bytecode).
 
-	The extraction uses a temporary definition that is automatically
-	cleaned up using the Coq's rollback mechanism.
+        The extraction uses a temporary definition that is automatically
+        cleaned up using the Coq's rollback mechanism.
     *)
     ocaml_compiler (States.with_state_protection ocaml_via_extraction ())
 
@@ -117,7 +117,7 @@ let compile c =
     let tmp_intf = Filename.chop_extension tmp ^ ".mli" in
     time "the extraction" (fun () -> 
       Extract_env.full_extraction (Some tmp) [
-	Libnames.Ident (Loc.ghost, constant)
+        Libnames.Ident (Loc.ghost, constant)
       ]);
     (** We are not interested in the interface file. *)
     cleanup tmp_intf;
@@ -132,23 +132,23 @@ let compile c =
     (** Compile using the right compiler. *)
     if Dynlink.is_native then (
       time "the compilation of the ocaml code" (fun () ->
-	let target  = compiled_module "cmx" in
-	let target' = compiled_module "cmxs" in
-	command (Printf.sprintf
-		   "%s -rectypes -c -I %s -o %s %s"
-		   ocamlopt coqlib target fname);
-	command (Printf.sprintf
-		   "%s -shared -o %s %s"
-		   ocamlopt target' target);
-	(target', [target; target'])
+        let target  = compiled_module "cmx" in
+        let target' = compiled_module "cmxs" in
+        command (Printf.sprintf
+                   "%s -rectypes -c -I %s -o %s %s"
+                   ocamlopt coqlib target fname);
+        command (Printf.sprintf
+                   "%s -shared -o %s %s"
+                   ocamlopt target' target);
+        (target', [target; target'])
       )
     ) else (
       let target = compiled_module "cmo" in
       time "the compilation of the ocaml code" (fun () ->
-	command (Printf.sprintf 
-		   "%s -rectypes -c -linkall -I %s -o %s %s/cybelePlugin.cma %s"
-		   ocamlc coqlib target coqlib fname);
-	(target, [target]))
+        command (Printf.sprintf 
+                   "%s -rectypes -c -linkall -I %s -o %s %s/cybelePlugin.cma %s"
+                   ocamlc coqlib target coqlib fname);
+        (target, [target]))
     )
   in
   compile ()
@@ -161,7 +161,7 @@ let dynload f =
     Dynlink.loadfile f
   with Dynlink.Error e ->
     Errors.error ("Cybele (during compiled code loading):"
-		   ^ (Dynlink.error_message e))
+                   ^ (Dynlink.error_message e))
 
 (* FIXME: Implement a sanity check to make sure that dynamic
    compilation and execution is possible. *)

@@ -5,11 +5,12 @@
 
 ## Targets
 ##########
-CMX_TARGETS = "src/cybeleConstants.cmx \
-            src/cybeleState.cmx \
-	    src/cybeleDynamicCompilation.cmx \
-	    src/cybele.cmx \
-	    src/cybelePluginModule.cmx"
+CMX_TARGETS = "\
+  src/cybeleConstants.cmx \
+  src/cybeleState.cmx \
+  src/cybeleDynamicCompilation.cmx \
+  src/cybele.cmx \
+  src/cybelePluginModule.cmx"
 
 CMO_TARGETS = $(CMX_TARGETS:.cmx=.cmo)
 
