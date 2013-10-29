@@ -25,10 +25,10 @@ let monadic_proof_by_reflection signature rtype c prophecy =
     (Lazy.force Monad.proof_by_reflection, [|
       signature; rtype; c; prophecy;
       Term.mkApp (Lazy.force Init.eq_refl, [|
-	Lazy.force Init.bool;
-	Term.mkApp (Lazy.force Monad.is_computable, [|
-	  signature; rtype; c; prophecy
-	|])
+        Lazy.force Init.bool;
+        Term.mkApp (Lazy.force Monad.is_computable, [|
+          signature; rtype; c; prophecy
+        |])
       |])
      |])
 

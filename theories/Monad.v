@@ -31,16 +31,16 @@ End MemSig.
 (** A memory of type [Mem.t sig] is the union of cells whose type is specified
     by [sig]. Each cell is an option type, initially with an empty value. *)
 Module Mem.
-  Inductive t: MemSig.t -> Type :=
-  | Nil: t nil
-  | Cons: forall (T: Type), option T -> forall (sig: MemSig.t), t sig ->
+  Inductive t : MemSig.t -> Type :=
+  | Nil : t nil
+  | Cons : forall (T : Type), option T -> forall (sig: MemSig.t), t sig ->
     t (T :: sig).
   
   (** A new memory with empty cells. *)
   Fixpoint init (sig: MemSig.t): t sig :=
     match sig with
     | nil => Nil
-    | cons T sig' => Cons None (init sig')
+    | cons T sig' => Cons (None (A := T)) (init sig')
     end.
   Arguments init [sig].
   
