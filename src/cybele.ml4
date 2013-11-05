@@ -55,6 +55,6 @@ let cybele c env =
 
 (** Syntax extension for our tactic. *)
 TACTIC EXTEND cybele
-| [ "cybele" constr(c) ] -> [ cybele c ]
+| [ "cybele" constr(c) ] -> [ Proofview.V82.tactic (cybele c) ]
 END
 
