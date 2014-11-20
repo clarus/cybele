@@ -45,7 +45,10 @@ let define c =
       (DefinitionEntry {
         const_entry_body = c;
         const_entry_secctx = None;
-        const_entry_type = None;
+	const_entry_feedback = None;
+	const_entry_type = None;
+	const_entry_polymorphic = false;
+	const_entry_universes = Univ.UContext.empty;
         const_entry_opaque = false;
         const_entry_inline_code = false
        },
@@ -167,7 +170,7 @@ let sanity_check () =
 (** The oracle compilation and execution. *)
 let compile_and_run_oracle c =
   sanity_check ();
-  let c = Future.from_val (c, Declareops.no_seff) in
+  let c = Future.from_val ((c,Univ.ContextSet.empty), Declareops.no_seff) in
   let dyncode, files = compile c in
   time "the extracted code" (fun () -> dynload dyncode);
   List.iter cleanup files

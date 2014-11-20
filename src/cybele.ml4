@@ -53,6 +53,8 @@ let cybele c env =
   (** Apply it. *)
   refine proof env
 
+DECLARE PLUGIN "cybele"
+
 (** Syntax extension for our tactic. *)
 TACTIC EXTEND cybele
 | [ "cybele" constr(c) ] -> [ Proofview.V82.tactic (cybele c) ]
