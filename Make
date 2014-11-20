@@ -14,15 +14,6 @@ CMX_TARGETS = "\
 
 CMO_TARGETS = $(CMX_TARGETS:.cmx=.cmo)
 
-# Native compilation options
-############################
-OPT_OPTIONS = "$(CAMLOPTLINK) $(ZDEBUG) $(ZFLAGS) -shared -o $@ $^"
--custom $(OPT_OPTIONS) $(CMX_TARGETS) src/cybelePlugin.cmxs
-
-# Bytecode compilation options
-##############################
--custom "$(CAMLLINK) -g -a -o $@ $^" $(CMO_TARGETS) src/cybelePlugin.cma
-
 # Custom variables
 ##################
 COQEPLUGIN = "src/cybelePlugin.cma"
