@@ -53,7 +53,7 @@ let cybele c env =
   (** Apply it. *)
   refine proof env
 
-DECLARE PLUGIN "cybele"
+DECLARE PLUGIN "cybelePlugin"
 
 (** Syntax extension for our tactic. *)
 TACTIC EXTEND cybele
