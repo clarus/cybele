@@ -404,7 +404,7 @@ Module Monad.
   
   Notation "'letrec!' X '[' F ']' ':=' A 'in' B" :=
   (let X := dependent_fix F (fun X => A) in B)
-  (at level 200, X ident, A at level 100, T at level 200, B at level 200).
+  (at level 200, X ident, A at level 100, B at level 200).
 
   (** A simply typed general fixpoint. *)
   Definition fix_ (sig: Sig.t) (A B: Type) (F: (A -> M sig B) -> A -> M sig B)
