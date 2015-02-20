@@ -5,12 +5,15 @@
 *.cmx
 *.cmxs
 *.cma
+*.a
+*.cmxa
 *.vo
 *.glob
 *.native
 *.opt
 *.tar.bz2
 *.d
+*.aux
 .depend
 extracted
 Makefile.bak
