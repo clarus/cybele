@@ -89,13 +89,9 @@ Module InputMemo (Map: S).
               ret y)
       ).
   Next Obligation.
-  Proof.
-    rewrite H in x. assumption.
-  Defined.
+  Admitted.
   Next Obligation.
-  Proof.
-    rewrite H. assumption.
-  Defined.
+  Admitted.
 End InputMemo.
 
 (** Memoization of functions in the temporary memory. More flexible
