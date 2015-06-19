@@ -7,7 +7,7 @@ open CybeleConstants
     and returns [s] and [t]. Otherwise an error is raised. *)
 let check_monadic_computation c env =
   (** Compute c's type. *)
-  let cty = Tacmach.pf_type_of env c in
+  let cty = Tacmach.pf_unsafe_type_of env c in
   (** Check that it is a monadic computation and extract on which
       signature the monad works and what is the type of the returned
       value. *)
