@@ -6,5 +6,5 @@ Lattice solver:
     ./configure.sh
     make
     coqide *.v -R . Lattice
-    
+
     Examples are in Examples.v.

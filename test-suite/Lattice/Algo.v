@@ -18,18 +18,18 @@ Module Term.
   | Var  : nat -> t
   | Meet : t -> t -> t
   | Join : t -> t -> t.
-  
+
   (** We define a complete order on [t], so they can be used as keys
       for map tables. *)
   Module MiniOrdered <: MiniOrderedType.
     Definition t := t.
-    
+
     Definition eq := eq (A := t).
-    
+
     Definition eq_refl := eq_refl (A := t).
     Definition eq_sym := eq_sym (A := t).
     Definition eq_trans := eq_trans (A := t).
-    
+
     Fixpoint lt (t1 t2: t): Prop :=
       match (t1, t2) with
       | (Var i1, Var i2) => i1 < i2
@@ -40,7 +40,7 @@ Module Term.
       | (_, Meet _ _) => False
       | (Join t11 t12, Join t21 t22) => lt t11 t21 \/ (t11 = t21 /\ lt t12 t22)
       end.
-    
+
     Lemma lt_trans: forall (t1 t2 t3: t),
       lt t1 t2 -> lt t2 t3 -> lt t1 t3.
       intros t1; induction t1; intros t2 t3 Ht1t2 Ht2t3;
@@ -53,15 +53,15 @@ Module Term.
           try destruct Ht2t3 as [Ht2t3eq Ht2t3lt]);
         [left | left | left | right]; [
           now apply IHt1_1 with (t2 := t2_1) |
-          
+
           now rewrite <- Ht2t3eq |
-          
+
           now rewrite Ht1t2eq |
-          
+
           split; [congruence |];
           now apply IHt1_2 with (t2 := t2_2)]).
     Qed.
-    
+
     Definition lt_not_eq: forall (t1 t2: t),
       lt t1 t2 -> t1 <> t2.
       intro t1; induction t1; intros t2 Hlt; destruct t2;
@@ -72,7 +72,7 @@ Module Term.
           [apply IHt1_1 with (t2 := t2_1) | apply IHt1_2 with (t2 := t2_2)];
           intuition congruence).
     Qed.
-    
+
     Fixpoint compare (t1 t2: t): Compare lt eq t1 t2.
       destruct t1 as [i1 | t11 t12 | t11 t12];
       destruct t2 as [i2 | t21 t22 | t21 t22];
@@ -83,22 +83,22 @@ Module Term.
             [apply LT | apply EQ | apply GT]; trivial; congruence);
         (destruct (compare t11 t21) as [Hlt1 | Heq1 | Hgt1];
           [apply LT; simpl; tauto |
-          
+
           destruct (compare t12 t22) as [Hlt2 | Heq2 | Hgt2]; [
             apply LT; simpl; tauto |
-            
+
             apply EQ; congruence |
-            
+
             apply GT; simpl; auto] |
-          
+
           apply GT; simpl; auto]).
     Defined.
   End MiniOrdered.
-  
+
   Module Ordered <: OrderedType := MOT_to_OT MiniOrdered.
-  
+
   Import SExpr.
-  
+
   (** A term can be reified from OCaml to Coq. *)
   Definition Reifiable := Reifiable.New
     (fix export t :=
@@ -123,7 +123,7 @@ Module Algo (P: Param).
   Import P Term
     Lattice.Definitions Lattice.Notations Lattice.Facts.
   Local Open Scope lattice_scope.
-  
+
   (** Evaluation of a [Term.t] in an environment. *)
   Fixpoint Eval (t : Term.t) (env : nat -> A): A :=
     match t with
@@ -131,44 +131,44 @@ Module Algo (P: Param).
     | Meet t1 t2 => (Eval t1 env) /*\ (Eval t2 env)
     | Join t1 t2 => (Eval t1 env) \*/ (Eval t2 env)
     end.
-  
+
   (** The predicate the algorithm proves: [leq] for reflected terms. *)
   Definition Leq (p: Term.t * Term.t) :=
     forall env, Eval (fst p) env <= Eval (snd p) env.
-  
+
   (** Lemmas used to generate the final proof in our algorithm.
       They are proofs on lattices lift to the [Leq] predicate. *)
   Module Facts.
     Ltac lift lemma :=
       intros; intro env; simpl; apply lemma; intuition.
-    
+
     Lemma CompareToMeetRight (t u1 u2: Term.t):
       Leq (t, u1) -> Leq (t, u2) -> Leq (t, Meet u1 u2).
       lift CompareToMeetRight.
     Qed.
-    
+
     Lemma CompareToMeetLeft (t1 t2 u: Term.t):
       Leq (t1, u) \/ Leq (t2, u) -> Leq (Meet t1 t2, u).
       lift CompareToMeetLeft.
     Qed.
-    
+
     Lemma CompareToJoinLeft (t1 t2 u: Term.t):
       Leq (t1, u) -> Leq (t2, u) -> Leq (Join t1 t2, u).
       lift CompareToJoinLeft.
     Qed.
-    
+
     Lemma CompareToJoinRight (t u1 u2: Term.t):
       Leq (t, u1) \/ Leq (t, u2) -> Leq (t, Join u1 u2).
       lift CompareToJoinRight.
     Qed.
   End Facts.
-  
+
   Module OrderedTermPair := PairOrderedType Term.Ordered Term.Ordered.
-  
+
   (** Map from pairs of terms to natural numbers.
       Usefull for memoization of branches. *)
   Module TermPairMap := Map OrderedTermPair.
-  
+
   (** A map that can be reifiable from Ocaml to Coq. *)
   Module ReifiableTermPairMap := Reifiable.Map TermPairMap.
   Definition ReifiableMap: Reifiable.t (TermPairMap.t nat) :=
@@ -188,12 +188,12 @@ Module Algo (P: Param).
   Definition Sig: Sig.t := Sig.Make
     (existT _ _ ReifiableMap :: nil)
     (TermPairMap.t {p: Term.t * Term.t & Leq p} :: nil).
-  
-  (** In order to compare the effectiveness of our method, we provide two 
+
+  (** In order to compare the effectiveness of our method, we provide two
      versions of the choice operator: one that tries blindly all branches
      and another that uses the data memoized in Ocaml. Here is the slow version
      that perform no optimization.*)
-  Fixpoint tryBranchesSlow (k : TermPairMap.key) 
+  Fixpoint tryBranchesSlow (k : TermPairMap.key)
     B (branches: list (unit -> M Sig B))
     : M Sig B :=
     match branches with
@@ -207,7 +207,7 @@ Module Algo (P: Param).
   (** Optimized version of the previous function: it tries everything in OCaml
      until no exception is raised, remembers the index of the branch and uses the
      index in Coq to directly find the successful branch. *)
-  Fixpoint tryBranchesFast (ref: Ref.t Sig _) (n_branch: nat) 
+  Fixpoint tryBranchesFast (ref: Ref.t Sig _) (n_branch: nat)
     (k : TermPairMap.key) B (branches: list (unit -> M Sig B))
     : M Sig B :=
     select
@@ -221,12 +221,12 @@ Module Algo (P: Param).
       (fun _ =>
         let! map := !ref in
         match TermPairMap.find k map with
-        | Some n => 
+        | Some n =>
           let! branch := extract_some (nth_error branches n) in
           branch tt
         | None =>
           match branches with
-          | nil => 
+          | nil =>
             error "No branch left to try"
           | (branch :: branches') =>
             try!
@@ -249,11 +249,11 @@ Module Algo (P: Param).
     :=
       let ref := input_ref Sig 0 (TermPairMap.empty _) in
       let tryBranches :=
-        if fast 
+        if fast
           then tryBranchesFast ref 0
           else tryBranchesSlow
       in
-      letrec! leq [fun p: Term.t * Term.t => Leq p] := 
+      letrec! leq [fun p: Term.t * Term.t => Leq p] :=
       (fun p =>
         match p as p' return M Sig (Leq p') with
         | (Var m, Var n) =>
@@ -272,7 +272,7 @@ Module Algo (P: Param).
         | (Var m, Join u1 u2) as p =>
             tryBranches p _ [
               let! r := leq (Var m, u1) in
-              ret (Facts.CompareToJoinRight (or_introl r)) 
+              ret (Facts.CompareToJoinRight (or_introl r))
             |||
               let! r := leq (Var m, u2) in
               ret (Facts.CompareToJoinRight (or_intror r))
@@ -304,7 +304,7 @@ Module Algo (P: Param).
   Next Obligation.
     intros. unfold Leq. intro. apply LeReflexive.
   Defined.
-   
+
   (*
   (** Memoize the results of [ProveLeq] in a map in the hope of being faster
       (no significant result yet). *)
@@ -322,7 +322,7 @@ Module Algo (P: Param).
       replace p with (fst p, snd p); [ | now destruct p].
       destruct Heq as [Heq1 Heq2]; rewrite Heq1; rewrite Heq2.
       exact (Return proof).
-      
+
       exact (Error "p' expected to be equal to p").
   Defined.
   *)
@@ -339,7 +339,7 @@ Module Algo (P: Param).
         end
       end in
       member' env.
-  
+
   (** Returns the position of [v] in [env], starting from [n]. *)
   Ltac rank env n v :=
     match env with
@@ -350,7 +350,7 @@ Module Algo (P: Param).
           | _ => rank env' (S n) v
           end
     end.
-  
+
   (** Performs the reflection of [v] using environment [env]. *)
   Ltac reflect env v :=
     match v with
@@ -367,7 +367,7 @@ Module Algo (P: Param).
           constr:(Var n)
     | _ => constr:(Var 0)
     end.
-  
+
   (** Creates an environment by scanning the variables in [t] *)
   Ltac variables env t :=
     match t with
@@ -383,7 +383,7 @@ Module Algo (P: Param).
       | false => constr:(cons X env)
       end
     end.
-  
+
   (** Reify a goal and takes a continuation for the next thing to do. *)
   Ltac Reify k :=
     match goal with
@@ -395,12 +395,12 @@ Module Algo (P: Param).
       let term2_ := reflect vars X2 in
       k env_ term1_ term2_
     end.
-  
+
   (** A continuation to [Reify] doing nothing except presentation. *)
   Ltac Only env_ term1_ term2_ :=
     set (env := env_); set (term1 := term1_); set (term2 := term2_);
     change (Eval term1 env <= Eval term2 env).
-  
+
   (** A continuation to [Reify] to call the [coq] tactic. *)
   Ltac Solve env_ term1_ term2_ :=
     set (env := env_);

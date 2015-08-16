@@ -12,10 +12,8 @@ Requirements
 - CoqEpsilon
 - ReleasedSsreflect
 
-
 Compilation
 ===========
 
 $ coq_makefile *.v > Makefile
 $ make
-

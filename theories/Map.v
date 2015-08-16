@@ -11,7 +11,7 @@ Set Implicit Arguments.
 Module Type IMap.
   Parameter key: Type.
   Parameter t: Type -> Type.
-  
+
   Parameter empty: forall (T: Type), t T.
   Parameter add: forall (T: Type), key -> T -> t T -> t T.
   Parameter remove: forall (T: Type), key -> t T -> t T.
@@ -25,10 +25,10 @@ End IMap.
 (** Maps implemented using [FMapAVL.Raw]. *)
 Module Map (X: OrderedType) <: IMap.
   Module Map := FMapAVL.Raw Z_as_Int X.
-  
+
   Definition key := Map.key.
   Definition t := Map.t.
-  
+
   Definition empty := Map.empty.
   Definition add := Map.add.
   Definition remove := Map.remove.
@@ -43,10 +43,10 @@ End Map.
     it computes the invariants which are useless here. *)
 Module FullMap (X: OrderedType) <: IMap.
   Module Map := FMapAVL.Make X.
-  
+
   Definition key := Map.key.
   Definition t := Map.t.
-  
+
   Definition empty := Map.empty.
   Definition add := Map.add.
   Definition remove := Map.remove.
@@ -60,10 +60,10 @@ End FullMap.
 (** Maps implemented using [FMapWeakList.Raw]. *)
 Module ListMap (X : DecidableType) <: IMap.
   Module Map := FMapWeakList.Raw X.
-  
+
   Definition key := Map.key.
   Definition t := Map.t.
-  
+
   Definition empty := Map.empty.
   Definition add := Map.add.
   Definition remove := Map.remove.
@@ -77,16 +77,16 @@ End ListMap.
 (** Maps implemented using redefined lists to prevent universe inconsistencies *)
 Module BasicMap (X : DecidableType) <: IMap.
   Require Import Arith.Peano_dec.
-  
+
   Inductive list (A: Type): Type :=
   | nil: list A
   | cons: A -> list A -> list A.
-  
+
   Definition key := X.t.
   Definition t (T: Type) := list (key * T).
-  
+
   Definition empty (T: Type): t T := nil _.
-  
+
   Fixpoint add (T: Type) (k: key) (x: T) (m: t T): t T :=
     match m with
     | nil _ => cons (k, x) (nil _)
@@ -95,7 +95,7 @@ Module BasicMap (X : DecidableType) <: IMap.
       then cons (k, x) m'
       else cons (k', x') (add k x m')
     end.
-  
+
   Fixpoint remove (T: Type) (k: key) (m: t T): t T :=
     match m with
     | nil _ => nil _
@@ -104,19 +104,19 @@ Module BasicMap (X : DecidableType) <: IMap.
       then m'
       else cons (k', x) (remove k m')
     end.
-  
+
   Fixpoint fold (T A: Type) (f: key -> T -> A -> A) (m: t T) (r: A): A :=
     match m with
     | nil _ => r
     | cons (k, x) m' => fold f m' (f k x r)
     end.
-  
+
   Fixpoint mapi (T T': Type) (f: key -> T -> T') (m: t T): t T' :=
     match m with
     | nil _ => nil _
     | cons (k, x) m' => cons (k, f k x) (mapi f m')
     end.
-  
+
   Fixpoint find (T: Type) (k: key) (m: t T): option T :=
     match m with
     | nil _ => None
@@ -125,13 +125,13 @@ Module BasicMap (X : DecidableType) <: IMap.
       then Some x
       else find k m'
     end.
-  
+
   Fixpoint cardinal (T: Type) (m: t T): nat :=
     match m with
     | nil _ => O
     | cons _ m' => S (cardinal m')
     end.
-  
+
   Definition equal (T: Type) (eq_dec: T -> T -> bool) (m1 m2: t T): bool :=
     if eq_nat_dec (cardinal m1) (cardinal m2) then
       fold (fun k x (r: bool) =>

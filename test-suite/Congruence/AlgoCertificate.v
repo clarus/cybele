@@ -12,27 +12,27 @@ Import Monad ListNotations.
 
 Module Certificate (P: Parameters).
   Require Import Cybele.Reifiable.
-  
+
   Inductive t :=
   | proof: nat -> t
   | sym: t -> t
   | trans: t -> t -> t
   | congruence: nat -> list t -> t.
-  
+
   Fixpoint build_eq_proof_by_congruence_aux (eq_proofs: list (EqProof.t P.Values))
     : let xs := List.map (fun p: EqProof.t _ => let (x, _, _) := p in x) eq_proofs in
       let ys := List.map (fun p: EqProof.t _ => let (_, y, _) := p in y) eq_proofs in
       Values.AreEqualList' P.Values xs ys.
     destruct eq_proofs as [| p ps]; simpl.
       exact I.
-      
+
       split.
         destruct p as [x y P].
         exact P.
-        
+
         apply (build_eq_proof_by_congruence_aux ps).
   Qed.
-  
+
   Definition build_eq_proof_by_congruence
     (f: nat) (eq_proofs: list (EqProof.t P.Values))
     : EqProof.t P.Values.
@@ -44,7 +44,7 @@ Module Certificate (P: Parameters).
       apply Values.AreEqualList'ImpliesAreEqualList.
       apply build_eq_proof_by_congruence_aux.
   Defined.
-  
+
   Definition to_proof (eq_proofs: list (EqProof.t P.Values))
     : t -> M Sig.empty (EqProof.t P.Values).
     refine (fix_ (fun rec c =>
@@ -69,9 +69,9 @@ Module Certificate (P: Parameters).
       end));
     congruence.
   Defined.
-  
+
   Import SExpr.
-  
+
   Definition reifiable: Reifiable.t Certificate.t :=
     Reifiable.New
       (fix export c :=
@@ -104,45 +104,45 @@ End Certificate.
 
 Module CongruenceClosureByCertificate (P: Parameters).
   Require Import Cybele.Reifiable.
-  
+
   Module Certificate := Certificate P.
   Definition T: Type := Index.t * Certificate.t.
-  
+
   (* Universe inconsistency *)
   (*Module ReifiableIndexMap := Reifiable.Map Index.FMap.
-  
+
   Definition Sig: Sig.t := Sig.Make [] [].
     (Index.FMap.t T :: (bool: Type) :: nil).
-  
+
   Definition Hash := Ref.t Sig (Index.FMap.t T).
   Definition M := M Sig.
-  
+
   Definition read (hash: Hash) (key: Index.t): M T :=
     let! map := !hash in
     match Index.FMap.find key map with
     | None => error "Hash read: not found"
     | Some v => ret v
     end.
-  
+
   Definition write (hash: Hash) (key: Index.t) (value: T): M unit :=
     let! map := !hash in
     match Index.FMap.find key map with
     | None => error "Hash write: not found"
     | Some _ => hash :=! Index.FMap.add key value map
     end.
-  
+
   Definition do (map: Index.FMap.t (M unit)): M (Index.FMap.t unit) :=
     Index.FMap.fold (fun k x map' =>
       let! x := x in
       let! map' := map' in
       ret (Index.FMap.add k x map'))
       map (ret (Index.FMap.empty _)).
-  
+
   Definition iter (hash: Hash) (f: Index.t -> T -> M unit): M unit :=
     let! map := !hash in
     do! do (Index.FMap.mapi f map) in
     ret tt.
-  
+
   Definition Find (hash: Hash) (index: Index.t)
     : M {index': Index.t | Values.AreEqual P.Values index index'}.
     refine (
@@ -166,7 +166,7 @@ Module CongruenceClosureByCertificate (P: Parameters).
       end);
       congruence.
   Defined.
-  
+
   (** Do the union and return [true] if the values were in different sets *)
   Definition Merge (hash: Hash) (Hij: T): M bool.
     refine (
@@ -183,7 +183,7 @@ Module CongruenceClosureByCertificate (P: Parameters).
       end).
     congruence.
   Defined.
-  
+
   (** The equality proof of two values if they are equivalent *)
   Definition AreEquiv (hash: Hash) (i j: Index.t)
     : M (option (Values.AreEqual P.Values i j)).
@@ -198,7 +198,7 @@ Module CongruenceClosureByCertificate (P: Parameters).
       end).
     congruence.
   Defined.
-  
+
   Fixpoint areCongruentAux (xs ys: list Index.t)
     (f: forall (x y: Index.t), M (option (Values.AreEqual P.Values x y)))
     {struct xs}
@@ -214,7 +214,7 @@ Module CongruenceClosureByCertificate (P: Parameters).
       | _ => ret None
       end); tauto.
   Defined.
-  
+
   (** The equality proof of two values if they are congruent *)
   Definition AreCongruent (hash: Hash)
     : forall (ij: Index.t * Index.t),
@@ -244,7 +244,7 @@ Module CongruenceClosureByCertificate (P: Parameters).
     apply Values.CongruenceRule.
     now apply Values.AreEqualList'ImpliesAreEqualList.
   Defined.
-  
+
   (** Merge two equal values and merge the new congruent terms *)
   Definition RecurseMerge (hash: Hash) (get_preds: Index.t -> M Index.FSet.t)
     (Pij: T): M bool :=
@@ -272,7 +272,7 @@ Module CongruenceClosureByCertificate (P: Parameters).
       else
         ret false)
       Pij.
-  
+
   (** Do a merge in [hash] if they are still some congruent values *)
   Definition TryMergeCongruent (hash: Hash): M bool :=
     let! r := tmp_ref Sig 1 false in
@@ -289,7 +289,7 @@ Module CongruenceClosureByCertificate (P: Parameters).
         | None => ret tt
        end)) in
      !r.
-  
+
   (** Merge congruent values until a fixpoint is reached (slow version) *)
   Definition CongruenceClosureNaive  (eq_proofs: list T)
     (other_indexes: list Index.t): M Hash :=
@@ -305,8 +305,8 @@ Module CongruenceClosureByCertificate (P: Parameters).
       let! b := TryMergeCongruent hash in
       continue :=! b) in
     ret hash.
-  
-  (** Generate the congruent relation given a list of equalities and 
+
+  (** Generate the congruent relation given a list of equalities and
       other involved terms *)
   Definition CongruenceClosure (eq_proofs: list T) (other_indexes: list Index.t)
     : M Hash :=
@@ -323,7 +323,7 @@ Module CongruenceClosureByCertificate (P: Parameters).
       EqProof.Make (i := i) (j := i) eq_refl) preds) in
     do! List.do (List.map (RecurseMerge hash get_preds) eq_proofs) in
     ret hash.
-  
+
   (** Compute the equality proof of two terms with congruence-closure *)
   Definition ProveEqual (eq_proofs: list T) (i j: Index.t)
     : M (Values.AreEqual P.Values i j).

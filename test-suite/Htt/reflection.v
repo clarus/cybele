@@ -21,7 +21,6 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-  
 (******************************************************************************)
 (* cancelR :                                                                  *)
 (*   Lemma automated with Canonical Structures to cancel heap expressions.    *)
@@ -36,7 +35,7 @@ Section HeapReflection.
 (* The algorithm works as follow:
    - if the heap is h1 :+ h2 then recurse over both and concatenate the results
    - if the heap is the empty heap, return []
-   - if the heap is p :-> v then add p to the context, and return [Pts x v], 
+   - if the heap is p :-> v then add p to the context, and return [Pts x v],
      where x is the deBruijn index for p in the context
    - if the heap is whatever else, add the heap to the context and return
      [Var n], where n is the deBruijn index for the heap in the context
@@ -49,16 +48,16 @@ Structure tagged_heap := Tag {untag :> heap}.
 Definition var_tag := Tag.
 Definition pts_tag := var_tag.
 Definition empty_tag := pts_tag.
-Canonical Structure union_tag hc := empty_tag hc. 
+Canonical Structure union_tag hc := empty_tag hc.
 
 Definition invariant i j t h := [/\ interp j t = h, subctx i j & valid j t].
 
 (* Main structure
    i : input context
    j : output context
-   t : syntactification of heap_of using context j *) 
-Structure ast (i j : ctx) (t : synheap) := 
-  Ast {heap_of :> tagged_heap; 
+   t : syntactification of heap_of using context j *)
+Structure ast (i j : ctx) (t : synheap) :=
+  Ast {heap_of :> tagged_heap;
        _ : invariant i j t heap_of}.
 
 Implicit Arguments Ast [].
@@ -73,35 +72,34 @@ by rewrite valid_cat D2 andbT; apply: (valid_subctx S2).
 Qed.
 
 (* pass output context of f1 as input of f2 *)
-Canonical Structure 
-  union_struct i j k t1 t2 (f1 : ast i j t1) (f2 : ast j k t2) := 
+Canonical Structure
+  union_struct i j k t1 t2 (f1 : ast i j t1) (f2 : ast j k t2) :=
   Ast i k _ (union_tag (f1 :+ f2)) (union_pf f1 f2).
 
 Lemma empty_pf i : invariant i i [::] (empty_tag empty).
 Proof. split; by [|apply: subctx_refl|]. Qed.
 
-Canonical Structure empty_struct i := 
+Canonical Structure empty_struct i :=
   Ast i i [::] (empty_tag empty) (empty_pf i).
- 
+
 Lemma pts_pf A hs xs1 xs2 x (d : A) (xs : xfind xs1 xs2 x):
-        invariant (Context hs xs1) (Context hs xs2) 
+        invariant (Context hs xs1) (Context hs xs2)
                   [:: Pts x (dyn d)] (pts_tag (xuntag xs :-> d)).
 Proof.
 case: xs=>[p /= [H P]]; split; first by rewrite /= H.
 - by split; [apply: prefix_refl|].
-by apply/andP; rewrite /= (onth_size H). 
+by apply/andP; rewrite /= (onth_size H).
 Qed.
 
-Canonical Structure 
+Canonical Structure
   pts_struct A hs xs1 xs2 x (d : A)
            (xs : xfind xs1 xs2 x) :=
-  Ast (Context hs xs1) (Context hs xs2) 
+  Ast (Context hs xs1) (Context hs xs2)
        [:: Pts x (dyn d)]
        (pts_tag (xuntag xs :-> d))
        (pts_pf hs _ xs).
 
-
-Lemma var_pf hs1 hs2 xs n (f : xfind hs1 hs2 n) : 
+Lemma var_pf hs1 hs2 xs n (f : xfind hs1 hs2 n) :
         invariant (Context hs1 xs) (Context hs2 xs) [:: Var n] (var_tag (xuntag f)).
 Proof.
 case:f=>p [H1 H2]; split; first by rewrite /= /hlook H1.
@@ -109,9 +107,9 @@ case:f=>p [H1 H2]; split; first by rewrite /= /hlook H1.
 by apply/andP; rewrite /= (onth_size H1).
 Qed.
 
-Canonical Structure var_struct hs1 hs2 xs n (f : xfind hs1 hs2 n) := 
-  Ast (Context hs1 xs) (Context hs2 xs) _ 
-      (var_tag (xuntag f)) 
-      (var_pf xs f). 
+Canonical Structure var_struct hs1 hs2 xs n (f : xfind hs1 hs2 n) :=
+  Ast (Context hs1 xs) (Context hs2 xs) _
+      (var_tag (xuntag f))
+      (var_pf xs f).
 
 End HeapReflection.

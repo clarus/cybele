@@ -27,16 +27,16 @@ Import Prenex Implicits.
 
 (* extensionality is needed for domains *)
 Axiom pext : forall p1 p2 : Prop, (p1 <-> p2) -> p1 = p2.
-Axiom fext : forall A (B : A -> Type) (f1 f2 : forall x, B x), 
+Axiom fext : forall A (B : A -> Type) (f1 f2 : forall x, B x),
                (forall x, f1 x = f2 x) -> f1 = f2.
 
 Lemma proof_irrelevance (P : Prop) (p1 p2 : P) : p1 = p2.
 Proof. by apply: ext_prop_dep_proof_irrel_cic; apply: pext. Qed.
 
 Lemma eta A (B : A -> Type) (f : forall x, B x) : f = [eta f].
-Proof. by apply: fext. Qed.   
+Proof. by apply: fext. Qed.
 
-Lemma ext A (B : A -> Type) (f1 f2 : forall x, B x) : 
+Lemma ext A (B : A -> Type) (f1 f2 : forall x, B x) :
         f1 = f2 -> forall x, f1 x = f2 x.
 Proof. by move=>->. Qed.
 
@@ -63,7 +63,7 @@ Prenex Implicits inj_pair2.
 
 Lemma inj_sval A P : injective (@sval A P).
 Proof.
-move=>[x Hx][y Hy] /= H; move: Hx Hy; rewrite H=>*. 
+move=>[x Hx][y Hy] /= H; move: Hx Hy; rewrite H=>*.
 congr exist; apply: proof_irrelevance.
 Qed.
 
@@ -75,7 +75,7 @@ Lemma sym A (x y : A) : x = y <-> y = x.
 Proof. by []. Qed.
 
 (* selecting a list element *)
-(* should really be in seq.v *) 
+(* should really be in seq.v *)
 
 Section HasSelect.
 Variables (A : eqType) (p : pred A).
@@ -100,7 +100,7 @@ End HasSelect.
 (****************)
 
 (* putting it in a module, to get a path name for typ and val *)
-Module Dyn. 
+Module Dyn.
 Record dynamic : Type := dyn {typ : Type; val : typ}.
 End Dyn.
 
@@ -158,7 +158,7 @@ Qed.
 
 Lemma jmeq_refl A (x : T A) : jmeq x x.
 Proof. by move=>pf; rewrite eqc. Qed.
-  
+
 End Coercions.
 
 Hint Resolve jmeq_refl.
@@ -177,7 +177,7 @@ Qed.
 Lemma contVT B (P : B -> B -> Prop) :
         (forall x x', B = B -> x =jm x' -> P x x') <-> forall x, P x x.
 Proof.
-split; first by move=>H x; exact: (H x x (erefl _) (jmeq_refl _)). 
+split; first by move=>H x; exact: (H x x (erefl _) (jmeq_refl _)).
 by move=>H x x' _; move/jmE=>->.
 Qed.
 
@@ -186,15 +186,15 @@ Qed.
 Section Coercions2.
 Variable (T : Type -> Type -> Type).
 
-Definition coerce2 A1 A2 B1 B2 (x : T A1 A2) : 
+Definition coerce2 A1 A2 B1 B2 (x : T A1 A2) :
              (A1, A2) = (B1, B2) -> T B1 B2.
 Proof. by move=>[<- <-]; exact: x. Defined.
 
-Lemma eqc2 A1 A2 (x : T A1 A2) (pf : (A1, A2) = (A1, A2)) : 
+Lemma eqc2 A1 A2 (x : T A1 A2) (pf : (A1, A2) = (A1, A2)) :
         coerce2 x pf = x.
 Proof. by move:pf; apply: Streicher_K. Qed.
 
-Definition jmeq2 A1 A2 B1 B2 (x : T A1 B1) (y : T A2 B2) := 
+Definition jmeq2 A1 A2 B1 B2 (x : T A1 B1) (y : T A2 B2) :=
              forall pf, coerce2 x pf = y.
 
 Lemma jm2E A B (x y : T A B) : jmeq2 x y <-> x = y.
@@ -204,7 +204,7 @@ Qed.
 
 Lemma refl_jmeq2 A B (x : T A B) : jmeq2 x x.
 Proof. by move=>pf; rewrite eqc2. Qed.
-  
+
 End Coercions2.
 
 Hint Resolve refl_jmeq2.
@@ -214,7 +214,7 @@ Implicit Arguments jmeq2 [A1 A2 B1 B2].
 (* operations on functions *)
 (***************************)
 
-Lemma compA A B C D (h : A -> B) (g : B -> C) (f : C -> D) : 
+Lemma compA A B C D (h : A -> B) (g : B -> C) (f : C -> D) :
         (f \o g) \o h = f \o (g \o h).
 Proof. by []. Qed.
 
@@ -233,7 +233,7 @@ Notation "f1 \* f2" := (fprod f1 f2) (at level 45).
 Section Reorder.
 Variables (A B C : Type).
 
-Definition swap (x : A * B) := 
+Definition swap (x : A * B) :=
   let: (x1, x2) := x in (x2, x1).
 Definition rCA (x : A * (B * C)) :=
   let: (x1, (x2, x3)) := x in (x2, (x1, x3)).
@@ -243,9 +243,9 @@ Definition rA (x : A * (B * C)) :=
   let: (x1, (x2, x3)) := x in ((x1, x2), x3).
 Definition iA (x : (A * B) * C) :=
   let: ((x1, x2), x3) := x in (x1, (x2, x3)).
-Definition pL (x : A * B) :=   
+Definition pL (x : A * B) :=
   let: (x1, x2) := x in x1.
-Definition pR (x : A * B) :=   
+Definition pR (x : A * B) :=
   let: (x1, x2) := x in x2.
 End Reorder.
 
@@ -262,7 +262,7 @@ Prenex Implicits Id.
 Lemma swapI A B : swap \o swap = @id (A * B).
 Proof. by apply: fext; case. Qed.
 
-Lemma rCAI A B C : rCA \o (@rCA A B C) = id. 
+Lemma rCAI A B C : rCA \o (@rCA A B C) = id.
 Proof. by apply: fext; case=>a [b c]. Qed.
 
 Lemma rACI A B C : rAC \o (@rAC A B C) = id.
@@ -274,11 +274,11 @@ Proof. by apply: fext; case=>[[]]. Qed.
 Lemma irA A B C : iA \o (@rA A B C) = id.
 Proof. by apply: fext; case=>a []. Qed.
 
-Lemma swap_prod A1 B1 A2 B2 (f1 : A1 -> B1) (f2 : A2 -> B2) : 
+Lemma swap_prod A1 B1 A2 B2 (f1 : A1 -> B1) (f2 : A2 -> B2) :
         swap \o f1 \* f2 = f2 \* f1 \o swap.
 Proof. by apply: fext; case. Qed.
 
-Lemma swap_rCA A B C : swap \o (@rCA A B C) = rAC \o rA. 
+Lemma swap_rCA A B C : swap \o (@rCA A B C) = rAC \o rA.
 Proof. by apply: fext; case=>x []. Qed.
 
 Lemma swap_rAC A B C : swap \o (@rAC A B C) = rCA \o iA.
@@ -366,5 +366,3 @@ Implicit Arguments and6P [b1 b2 b3 b4 b5 b6].
 Implicit Arguments or5P [b1 b2 b3 b4 b5].
 Implicit Arguments or6P [b1 b2 b3 b4 b5 b6].
 Prenex Implicits and6P or5P or6P.
-
-

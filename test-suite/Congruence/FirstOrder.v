@@ -78,7 +78,7 @@ Program Instance FindHead {A : Type}
   index := O
 }.
 
-(** [FindTail] is an instance of the predicate [Find where the 
+(** [FindTail] is an instance of the predicate [Find where the
     pair is the tail of the signature. *)
 Program Instance FindTail {A : Type}
   (k : nat)  (x : (type_of_arity A k))
@@ -127,7 +127,6 @@ Fixpoint apply
 
 Eval compute in (apply 0 2 (fun x y => x + y) (4 :: 5 :: nil)).
 
-
 (** Finally, we are ready to define the interpretation
     of a constructor [f] of arity [k] in a signature [sgn]. *)
 Definition constructor_interpretation {A}
@@ -144,7 +143,7 @@ match List.nth_error sgn f with
       end
 end.
 
-(** Apply a constructor [f] to a list of arguments by applying them to the 
+(** Apply a constructor [f] to a list of arguments by applying them to the
     the interpretation of [f] found in a given signature. *)
 Definition apply_constructor {A}
   (default : A)
@@ -209,7 +208,6 @@ Ltac sound_reification_rule :=
   rewrite found; simpl; unfold coerce_type_of_arity;
   (repeat rewrite term_reification_correct); auto.
 
-
 (** A rule for this predicate: a constant*)
 Program Instance ReifyConstant {A} (default : A) (sgn : signature A)
   (T : A) (S : Find sgn 0 T) : ReifyTerm default sgn T := {
@@ -230,7 +228,7 @@ Program Instance ReifyApp2 {A} (default : A) (sgn : signature A)
   (T1 : A) (RT1 : ReifyTerm default sgn T1)
   (T2 : A) (RT2 : ReifyTerm default sgn T2)
 : ReifyTerm default sgn (F T1 T2) := {
-   term_reification := App (index (k := 2) (x := F)) 
+   term_reification := App (index (k := 2) (x := F))
                            [ term_reification (T := T1);
                              term_reification (T := T2) ]
 }.
@@ -297,13 +295,13 @@ Definition assume (p : problem) (e : equality) : problem :=
 (** A predicate stating that [P] has a reification in a signature [sgn]. *)
 Class ProblemReification {A} (default : A) (sgn : signature A) (P : Prop) := {
   problem_reification : problem;
-  problem_reification_correct : 
+  problem_reification_correct :
   problem_interpretation default sgn problem_reification <-> P
 }.
 
 (** An equality is a goal for a problem with no hypothesis. *)
 Program Instance problem_base {A} (default : A) (sgn : signature A)
-  (x y : A) 
+  (x y : A)
   (xr : ReifyTerm default sgn x)
   (yr : ReifyTerm default sgn y)
 : ProblemReification default sgn (x = y) := {
@@ -342,7 +340,7 @@ Defined.
 Implicit Arguments problem_reification [A sgn ProblemReification].
 
 Print Implicit problem_reification.
-  
+
 Example p1 :=
   (problem_reification (A := nat) (sgn := sgn1) 0
                        (41 = 41 -> S 41 = S 41)).

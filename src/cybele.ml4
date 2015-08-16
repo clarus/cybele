@@ -59,4 +59,3 @@ DECLARE PLUGIN "cybelePlugin"
 TACTIC EXTEND cybele
 | [ "cybele" constr(c) ] -> [ Proofview.V82.tactic (cybele c) ]
 END
-

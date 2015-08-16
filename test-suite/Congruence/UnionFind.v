@@ -14,7 +14,7 @@ Module UnionFind.
   Definition Sig: Sig.t := Sig.Make nil ((Array.internal_t nat: Type) :: nil).
   Definition Array := Array.t Sig nat.
   Definition M := M Sig.
-  
+
   (** The representative of [i] *)
   Definition Find (array: Array) (i: nat): M nat :=
     fix_ (fun f i =>
@@ -23,13 +23,13 @@ Module UnionFind.
       | left _ => ret i
       | right _ => f j
       end) i.
-  
+
   (** Merge the equivalent classes of [i] and [j] *)
   Definition Unify (array: Array) (i j: nat): M unit :=
     let! i' := Find array i in
     let! j' := Find array j in
     Array.write array i' j'.
-  
+
   (** Do the union-find with a list of equalities and return
       the list of representatives *)
   Definition UnionFind (n: nat) (unions: list (nat * nat))
@@ -40,10 +40,10 @@ Module UnionFind.
       Unify array i j)
       unions in
     Array.to_list array.
-  
+
   Definition Eval (n: nat) (l: list (nat * nat)) (nb_steps: nat) :=
     UnionFind n l (State.of_prophecy (Prophecy.of_nat _ nb_steps)).
-  
+
   Compute Eval 10 nil 0.
   Compute Eval 10 [(0, 1); (0, 0); (2, 9); (1, 4); (4, 1)] 2.
 End UnionFind.

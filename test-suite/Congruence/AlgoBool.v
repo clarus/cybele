@@ -18,44 +18,44 @@ Module CongruenceClosureBool (P: Parameters).
       i: Index.t;
       j: Index.t;
       H: True}.
-    
+
     Arguments Make [T values i j] H.
   End EqProof.
-  
+
   Definition T: Type := EqProof.t P.Values.
-  
+
   Definition Sig: Sig.t := Sig.Make nil
     (Index.FMap.t T :: (bool: Type) :: nil).
-  
+
   Definition Hash := Ref.t Sig (Index.FMap.t T).
   Definition M := M Sig.
-  
+
   Definition read (hash: Hash) (key: Index.t): M T :=
     let! map := !hash in
     match Index.FMap.find key map with
     | None => error "Hash read: not found"
     | Some v => ret v
     end.
-  
+
   Definition write (hash: Hash) (key: Index.t) (value: T): M unit :=
     let! map := !hash in
     match Index.FMap.find key map with
     | None => error "Hash write: not found"
     | Some _ => hash :=! Index.FMap.add key value map
     end.
-  
+
   Definition do (map: Index.FMap.t (M unit)): M (Index.FMap.t unit) :=
     Index.FMap.fold (fun k x map' =>
       let! x := x in
       let! map' := map' in
       ret (Index.FMap.add k x map'))
       map (ret (Index.FMap.empty _)).
-  
+
   Definition iter (hash: Hash) (f: Index.t -> T -> M unit): M unit :=
     let! map := !hash in
     do! do (Index.FMap.mapi f map) in
     ret tt.
-  
+
   Definition Find (hash: Hash) (index: Index.t)
     : M {index': Index.t | True}.
     refine (
@@ -78,7 +78,7 @@ Module CongruenceClosureBool (P: Parameters).
           ret (exist _ k _)
       end); exact I.
   Defined.
-  
+
   (** Do the union and return [true] if the values were in different sets *)
   Definition Merge (hash: Hash) (Hij: T): M bool.
     refine (
@@ -94,7 +94,7 @@ Module CongruenceClosureBool (P: Parameters).
         ret true
       end); exact I.
   Defined.
-  
+
   (** The equality proof of two values if they are equivalent *)
   Definition AreEquiv (hash: Hash) (i j: Index.t)
     : M (option True).
@@ -109,7 +109,7 @@ Module CongruenceClosureBool (P: Parameters).
       end);
     exact I.
   Defined.
-  
+
   Fixpoint areCongruentAux (xs ys: list Index.t)
     (f: forall (x y: Index.t), M (option True))
     {struct xs}
@@ -125,7 +125,7 @@ Module CongruenceClosureBool (P: Parameters).
       | _ => ret None
       end); exact I.
   Defined.
-  
+
   (** The equality proof of two values if they are congruent *)
   Definition AreCongruent (hash: Hash)
     : forall (ij: Index.t * Index.t),
@@ -152,7 +152,7 @@ Module CongruenceClosureBool (P: Parameters).
       | false => ret None
       end); exact I.
   Defined.
-  
+
   (** Merge two equal values and merge the new congruent terms *)
   Definition RecurseMerge (hash: Hash) (get_preds: Index.t -> M Index.FSet.t)
     (Pij: T): M bool :=
@@ -180,7 +180,7 @@ Module CongruenceClosureBool (P: Parameters).
       else
         ret false)
       Pij.
-  
+
   (** Generate the congruent relation given a list of equalities and
       other involved terms *)
   Definition CongruenceClosure (eq_proofs: list T) (other_indexes: list Index.t)
@@ -198,7 +198,7 @@ Module CongruenceClosureBool (P: Parameters).
       EqProof.Make (i := i) (j := i) I) preds) in
     do! List.do (List.map (RecurseMerge hash get_preds) eq_proofs) in
     ret hash.
-  
+
   (** Compute the equality proof of two terms with congruence-closure *)
   Definition ProveEqual (eq_proofs: list T) (i j: Index.t)
     : M True.

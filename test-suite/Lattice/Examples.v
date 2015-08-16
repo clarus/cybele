@@ -9,13 +9,13 @@ Import Monad.
     extraction; here the lattice of natural numbers *)
 Module P <: Lattice.Param.
   Definition A := nat.
-  
+
   Definition Lattice: Lattice.t A.
     refine (Lattice.New min max
       Nat.min_id Nat.min_comm _ Nat.max_min_absorption
       Nat.max_id Nat.max_comm _ Nat.min_max_absorption); intros.
       now rewrite Nat.min_assoc.
-      
+
       now rewrite Nat.max_assoc.
   Defined.
 End P.
@@ -26,7 +26,6 @@ Import P Lattice.Notations Algo.
 Local Open Scope lattice_scope.
 
 Set Extraction AccessOpaque.
-
 
 (** Small examples are solved without compilation to OCaml since extraction
     can be very slow with the full Map library. *)
@@ -46,8 +45,7 @@ Lemma median: forall x y z,
   now vm_compute.
 Defined.
 
-
-(** ** Performance tests *) 
+(** ** Performance tests *)
 
 Definition gas := 10000.
 
@@ -130,7 +128,6 @@ Lemma nc_ex7: forall
     now solve_without_ocaml term1 term2.
 Time Qed.
 
-
 (** With extraction to OCaml and branch memoization. *)
 
 Lemma ex1: forall
@@ -187,10 +184,7 @@ Lemma ex6: forall
   Time intros; Reify Solve.
 Time Qed.
 
-
-
 (** *** Examples with repetition patterns *)
-
 
 (** Not extracting to Ocaml. *)
 
@@ -256,7 +250,6 @@ Lemma nc_ex_with_repetitions05: forall
     now solve_without_ocaml term1 term2.
 Time Qed.
 
-
 Lemma nc_ex_with_repetitions06: forall
   (x00 x01 x02 x03 x04 x05 x06
    y00 y01 y02 y03 y04 y05 y06
@@ -274,7 +267,6 @@ Lemma nc_ex_with_repetitions06: forall
   Time intros; Reify Only;
     now solve_without_ocaml term1 term2.
 Time Qed.
-
 
 (** Extracting to Ocaml. *)
 
@@ -335,7 +327,6 @@ Lemma ex_with_repetitions05: forall
   idtac "ex_with_repetitions05".
   Time intros; Reify Solve.
 Time Qed.
-
 
 Lemma ex_with_repetitions06: forall
   (x00 x01 x02 x03 x04 x05 x06

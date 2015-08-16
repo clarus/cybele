@@ -1,11 +1,11 @@
-(** This module implements the dynamic compilation process. 
+(** This module implements the dynamic compilation process.
 
     It basically consists in the following steps:
 
     (i) use the extraction mechanism of Coq to produce ML code
     out of a monadic computation ;
 
-    (ii) compile the resulting ML module that depends on the 
+    (ii) compile the resulting ML module that depends on the
     plugin itself ;
 
     (iii) dynamically load the ML module which has the effect of
@@ -124,7 +124,7 @@ let compile c =
     (** Use a temporary file for the compiled module. *)
     let compiled_module =
       let basename = Filename.temp_file "cybele_dyn" "" in
-      fun ext -> basename ^ "." ^ ext 
+      fun ext -> basename ^ "." ^ ext
     in
     (** Compile using the right compiler. *)
     if Dynlink.is_native then (
@@ -142,7 +142,7 @@ let compile c =
     ) else (
       let target = compiled_module "cmo" in
       time "the compilation of the ocaml code" (fun () ->
-        command (Printf.sprintf 
+        command (Printf.sprintf
                    "%s -rectypes -c -linkall -I %s -o %s %s/cybelePlugin.cma %s"
                    ocamlc coqlib target coqlib fname);
         (target, [target]))
@@ -174,4 +174,3 @@ let compile_and_run_oracle c =
   let dyncode, files = compile c in
   time "the extracted code" (fun () -> dynload dyncode);
   List.iter cleanup files
-

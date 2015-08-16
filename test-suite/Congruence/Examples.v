@@ -17,7 +17,7 @@ Import Monad ListNotations.
 (** Example with only constants *)
 Module ExampleNoFun.
   Require Import Algo.
-  
+
   Module P <: Parameters.
     Definition T := nat.
     Definition Values :=
@@ -26,12 +26,12 @@ Module ExampleNoFun.
   End P.
   Module CC := CongruenceClosure P.
   Import CC.
-  
+
   Definition IndexOfNat (i: nat): Index.t :=
     Index.Make i nil.
-  
+
   Coercion IndexOfNat: nat >-> Index.t.
-  
+
   Definition eq_proofs: list T.
     refine (
       EqProof.Make (i := 0) (j := 4) _ ::
@@ -41,12 +41,12 @@ Module ExampleNoFun.
       nil);
     now unfold Values.AreEqual.
   Defined.
-  
+
   Lemma Eq1: Values.AreEqual P.Values 0 4.
     now apply (proof_by_reflection (ProveEqual eq_proofs 0 4)
       (Prophecy.of_nat Sig 100)).
   Defined.
-  
+
   Lemma Eq2: Values.AreEqual P.Values 1 6.
     now apply (proof_by_reflection (ProveEqual eq_proofs 1 6)
       (Prophecy.of_nat Sig 100)).
@@ -56,10 +56,10 @@ End ExampleNoFun.
 (** Small example relying on congruence *)
 Module ExampleCongruence.
   Require Import Algo.
-  
+
   Module P <: Parameters.
     Definition T := nat.
-    
+
     Definition Values: list (Value.t T) :=
       Value.Make 0 (fun _ => 3) ::
       Value.Make 1 (fun v =>
@@ -69,14 +69,14 @@ Module ExampleCongruence.
         end) ::
       nil.
   End P.
-  
+
   Module CC := CongruenceClosure P.
   Import CC.
-  
+
   Definition a := Index.Make 0 nil.
   Definition fa := Index.Make 1 (a :: nil).
   Definition ffa := Index.Make 1 (fa :: nil).
-  
+
   Fixpoint fn n :=
     match n with
       | O => a
@@ -92,21 +92,21 @@ Module ExampleCongruence.
       EqProof.Make (i := a) (j := fa) _ ::
       nil); now unfold Values.AreEqual.
   Defined.
-  
+
   Definition eval (x y: Index.t) (nb_steps: nat) :=
     if fst (ProveEqual eq_proofs x y
       (State.of_prophecy (Prophecy.of_nat Sig nb_steps)))
     then true else false.
-  
+
   Time Compute eval a a 1.
   Time Compute eval fa a 100.
   Time Compute eval fa ffa 100.
   Time Compute eval a fa 100.
   Time Compute eval fa fbig 100.
-  
+
   Definition Equal (i j: Index.t) :=
     proof_by_reflection (ProveEqual eq_proofs i j) (Prophecy.of_nat Sig 100).
-  
+
   Check Equal a a eq_refl.
   Check Equal a fa eq_refl.
   Check Equal a ffa eq_refl.
@@ -116,7 +116,7 @@ End ExampleCongruence.
 Module ExampleBig.
   Module P <: Parameters.
     Definition T := nat.
-    
+
     Definition Values: list (Value.t T) :=
       Value.Make 0 (fun _ => 3) ::
       Value.Make 0 (fun _ => 1) ::
@@ -132,7 +132,7 @@ Module ExampleBig.
         end) ::
       nil.
   End P.
-  
+
   Definition a := Index.Make 0 nil.
   Definition b := Index.Make 1 nil.
   Definition fa := Index.Make 2 (a :: nil).
@@ -140,23 +140,23 @@ Module ExampleBig.
   Definition fgba := Index.Make 2 (Index.Make 3 (b :: a :: nil) :: nil).
   Definition gbfa := Index.Make 3 (b :: fa :: nil).
   Definition ffa := Index.Make 2 (fa :: nil).
-  
+
   Fixpoint f_n_a (n: nat) :=
     match n with
     | O => a
     | S n' => Index.Make 2 [f_n_a n']
     end.
-  
+
   Check eq_refl: Values.NthIndex P.Values a = Some 3.
   Check eq_refl: Values.NthIndex P.Values fa = Some 3.
   Check eq_refl: Values.NthIndex P.Values ffa = Some 3.
   Check eq_refl: Values.NthIndex P.Values fgba = Some 3.
-  
+
   Module GenerateProofs.
     Require Import Algo.
     Module CC := CongruenceClosure P.
     Import CC.
-    
+
     Definition eq_proofs: list T.
       refine (
         EqProof.Make (i := a) (j := fa) _ ::
@@ -165,41 +165,41 @@ Module ExampleBig.
         EqProof.Make (i := gab) (j := a) _ ::
         nil); now unfold Values.AreEqual.
     Defined.
-    
+
     Definition compute (i j: Index.t): bool :=
       is_computable (ProveEqual eq_proofs i j) (Prophecy.of_nat Sig 100).
-    
+
     Time Compute compute a fa.
     Time Compute compute gab a.
     Time Compute compute (f_n_a 200) a.
-    
+
     Definition equal (i j: Index.t) :=
       proof_by_reflection (ProveEqual eq_proofs i j) (Prophecy.of_nat Sig 100).
-    
+
     Time Check equal a a eq_refl.
     Time Check equal a fa eq_refl.
     Time Check equal a ffa eq_refl.
     Time Fail Check equal a b eq_refl.
     Time Check equal gab a eq_refl.
-    
+
     Lemma Eq1: Values.AreEqual P.Values a ffa.
       apply (proof_by_reflection (ProveEqual eq_proofs a ffa)
         (Prophecy.of_nat Sig 100)).
       now vm_compute.
     Defined.
-    
+
     Lemma Eq2: Values.AreEqual P.Values gab a.
       apply (proof_by_reflection (ProveEqual eq_proofs gab a)
         (Prophecy.of_nat Sig 100)).
       now vm_compute.
     Defined.
   End GenerateProofs.
-  
+
   Module JustDecide.
     Require Import AlgoBool.
     Module CC := CongruenceClosureBool P.
     Import CC.
-    
+
     Definition eq_proofs: list T.
       refine (
         EqProof.Make (i := a) (j := fa) _ ::
@@ -208,17 +208,17 @@ Module ExampleBig.
         EqProof.Make (i := gab) (j := a) _ ::
         nil); now unfold Values.AreEqual.
     Defined.
-    
+
     Definition compute (i j: Index.t): bool :=
       is_computable (ProveEqual eq_proofs i j) (Prophecy.of_nat Sig 100).
-    
+
     Time Compute compute a fa.
     Time Compute compute gab a.
     Time Compute compute (f_n_a 200) a.
-    
+
     Definition equal (i j: Index.t) :=
       proof_by_reflection (ProveEqual eq_proofs i j) (Prophecy.of_nat Sig 100).
-    
+
     Time Check equal a a eq_refl.
     Time Check equal a fa eq_refl.
     Time Check equal a ffa eq_refl.

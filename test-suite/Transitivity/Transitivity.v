@@ -32,19 +32,19 @@ Record formula : Type := mkFormula {
   goal : T * T
 }.
 
-Definition interpret_pair (e : T * T) : Prop := 
+Definition interpret_pair (e : T * T) : Prop :=
   (fst e) <= (snd e).
 
-Fixpoint interpret_hypothesis_list h : Prop := 
+Fixpoint interpret_hypothesis_list h : Prop :=
   match h with
     | nil => True
     | e :: nil => interpret_pair e
     | e :: es => interpret_pair e /\ interpret_hypothesis_list es
   end.
 
-Notation "▹ e" := ((fun x => x) (_ e)) (at level 200). 
+Notation "▹ e" := ((fun x => x) (_ e)) (at level 200).
 
-Lemma weak_list : forall A (P Q : A -> Prop), 
+Lemma weak_list : forall A (P Q : A -> Prop),
                     list { x : A & P x } ->
                     (forall x, P x -> Q x) ->
                     list { x : A & Q x }.
@@ -58,30 +58,30 @@ Program Fixpoint successors (x : T) (hs : list (T * T)) { struct hs }
   match hs with
     | nil => nil
     | (x', y) :: hs' =>
-        if eq_dec x x' then 
+        if eq_dec x x' then
           (▹ y) :: ▹ (successors x hs')
-        else 
+        else
           ▹ (successors x hs')
   end.
-Next Obligation. 
+Next Obligation.
 Proof.
   unfold interpret_pair. destruct hs'; simpl; exists x0; intuition; order.
 Defined.
 Next Obligation.
-Proof. 
-  unfold interpret_pair.  simpl. eapply (weak_list _ _ _ x0). intros. 
+Proof.
+  unfold interpret_pair.  simpl. eapply (weak_list _ _ _ x0). intros.
   destruct hs'. simpl in * |- *. auto. intuition.
 Defined.
 Next Obligation.
-Proof. 
-  unfold interpret_pair.  simpl. eapply (weak_list _ _ _ x0). intros. 
+Proof.
+  unfold interpret_pair.  simpl. eapply (weak_list _ _ _ x0). intros.
   destruct hs'. simpl in * |- *. auto. intuition.
 Defined.
 
-Definition interpret f : Prop := 
+Definition interpret f : Prop :=
   interpret_hypothesis_list (hypothesis f) -> interpret_pair (goal f).
 
-Definition interpret_hypotheses f : Prop := 
+Definition interpret_hypotheses f : Prop :=
   interpret_hypothesis_list (hypothesis f).
 
 Module OOF <: OrderedType.OrderedType.
@@ -92,8 +92,8 @@ Module OOF <: OrderedType.OrderedType.
   Definition eq_trans := OF.eq_trans.
   Definition lt_trans := OF.lt_trans.
   Lemma lt_not_eq : forall x y : t, lt x y -> ~ eq x y. OF.order. Qed.
-  Ltac compare_spec_auto x y Heq := 
-    generalize (compare_spec x y); 
+  Ltac compare_spec_auto x y Heq :=
+    generalize (compare_spec x y);
     rewrite <- Heq; intro Hspec; inversion Hspec; auto.
 
   Program Definition compare (x y :T) : OrderedType.Compare lt eq x y :=
@@ -115,7 +115,7 @@ Print Module Z_as_Int.
 Module Type Table.
   Definition key := O.t.
   Inductive tree elt :=
-  | Leaf : tree elt 
+  | Leaf : tree elt
   | Node : tree elt -> key -> elt -> tree elt -> Z_as_Int.t -> tree elt.
 
   Parameter mem : forall elt, key -> tree elt -> bool.
@@ -123,7 +123,7 @@ Module Type Table.
 End Table.
 
 Module MarksTable <: Table := Raw Z_as_Int (OOF).
-  
+
 Definition Marks := MarksTable.t bool.
 
 Definition Σ := Sig.Make nil [ Marks ].
@@ -131,13 +131,13 @@ Definition Σ := Sig.Make nil [ Marks ].
 Fixpoint choice A {T} (cs : list T) (pred : T -> M Σ A) : M Σ A :=
   match cs with
     | nil => error "Not found"
-    | c :: cs => 
-        try! 
-          pred c 
+    | c :: cs =>
+        try!
+          pred c
         with  _ => choice A cs pred
     end.
 
-(* FIXME: Why does Program notation for ! has priority over our notation 
+(* FIXME: Why does Program notation for ! has priority over our notation
        for dereferencing? *)
 
 Program Definition decide : forall f:formula, M Σ (interpret f) :=
@@ -145,19 +145,19 @@ Program Definition decide : forall f:formula, M Σ (interpret f) :=
   let a := fst (goal f) in
   let b := snd (goal f) in
   let! marks_ref := tmp_ref Σ 0 (MarksTable.empty bool) in
-  let marked (x : T) : M Σ bool := 
-    let! marks : Marks := ! marks_ref in 
-    ret (MarksTable.mem x marks) 
-  in 
+  let marked (x : T) : M Σ bool :=
+    let! marks : Marks := ! marks_ref in
+    ret (MarksTable.mem x marks)
+  in
   let mark (x : T) : M Σ unit :=
       let! marks : Marks := ! marks_ref in
       marks_ref :=! (MarksTable.add x true marks)
-  in  
+  in
   letrec! traverse
   [ (fun (x : T) => (interpret_hypotheses f) -> x <= b) ] :=
-    (fun x => 
+    (fun x =>
       if x =?= b then ret (▹ eq_refl x)
-      else if! marked x then error "Not Found"  
+      else if! marked x then error "Not Found"
       else do! mark x in
           choice ((interpret_hypotheses f) -> x <= b) (successors x (hypothesis f))
           (fun (s : { y : T & interpret_hypotheses f -> x <= y }) =>
@@ -186,7 +186,7 @@ Ltac reify_pair f :=
 Ltac reify_hypothesis hs :=
   match hs with
       | ?X <= ?Y => constr: ((X, Y) :: nil)
-      | ?X <= ?Y /\ ?H => 
+      | ?X <= ?Y /\ ?H =>
           let h := reify_hypothesis H in
           constr: ((X, Y) :: h)
       | _ =>
@@ -195,7 +195,7 @@ Ltac reify_hypothesis hs :=
 
 Ltac reify_formula f :=
   match f with
-      |  ?H -> ?G => 
+      |  ?H -> ?G =>
            let h := reify_hypothesis H in
            let g := reify_pair G in
            constr: (TNat.mkFormula h g)
@@ -204,7 +204,7 @@ Ltac reify_formula f :=
   end.
 
 Ltac decide_goal_formula :=
-  match goal with | |- ?G => 
+  match goal with | |- ?G =>
      let f := reify_formula G in let x := constr:(TNat.decide f) in cybele x
   end.
 
@@ -214,7 +214,3 @@ Example f2 : (0 <= 1 /\ 1 <= 2) -> 0 <= 2. decide_goal_formula. Defined.
 Example f3 : (0 <= 1 /\ 1 <= 2 /\ 2 <= 3) -> 0 <= 3. decide_goal_formula. Defined.
 Example f4 : (0 <= 1 /\ 1 <= 0 /\ 2 <= 3) -> (2 <= 3). decide_goal_formula. Defined.
 Example f5 : (2 <= 5 /\ 5 <= 100 /\ 5 <= 50 /\ 50 <= 70) -> (50 <= 70). decide_goal_formula. Defined.
-
-
-  
-
