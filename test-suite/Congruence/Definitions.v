@@ -5,7 +5,7 @@ Require Import String.
 Require Import List.
 Require Import OrderedType.
 Require Import FSetAVL.
-Require Import Cybele.
+Require Import Cybele.Cybele.
 Require Import Cybele.Map.
 Require Import Cybele.DataStructures.
 
@@ -90,7 +90,7 @@ Module Index.
       | _ => false
       end in
     match (x, y) with
-    | (Make i xs, Make j ys) => andb (NPeano.Nat.eqb i j) (eqbs xs ys)
+    | (Make i xs, Make j ys) => andb (PeanoNat.Nat.eqb i j) (eqbs xs ys)
     end.
 
   (** Decidability of equality on indexes *)

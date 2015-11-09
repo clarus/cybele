@@ -1,8 +1,9 @@
 Require Import Arith.
+Require Import Omega.
 Require Import OrderedType.
 Require Import OrderedTypeEx.
 Require Import Lattice.
-Require Import Cybele.
+Require Import Cybele.Cybele.
 Require Import Cybele.Map.
 Require Import Cybele.Reifiable.
 

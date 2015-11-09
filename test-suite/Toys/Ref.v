@@ -1,4 +1,4 @@
-Require Import Cybele.
+Require Import Cybele.Cybele.
 Require Import Cybele.Reifiable.
 Import Monad.
 

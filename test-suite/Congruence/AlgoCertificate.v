@@ -1,7 +1,7 @@
 (** Congruence closure *)
 Require Import Arith.Peano_dec.
 Require Import List.
-Require Import Cybele.
+Require Import Cybele.Cybele.
 Require Import Cybele.Map.
 Require Import Cybele.DataStructures.
 Require Import Definitions.

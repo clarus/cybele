@@ -1,7 +1,7 @@
 (** Congruence closure *)
 Require Import Arith.Peano_dec.
 Require Import List.
-Require Import Cybele.
+Require Import Cybele.Cybele.
 Require Import Cybele.Map.
 Require Import Cybele.DataStructures.
 Require Import Definitions.
@@ -142,7 +142,7 @@ Module CongruenceClosureBool (P: Parameters).
       end); clear OHxy.
     destruct x as [i xs]; destruct y as [j ys]; simpl.
     refine (
-      match NPeano.Nat.eqb i j with
+      match PeanoNat.Nat.eqb i j with
       | true =>
         let! OHxsys := areCongruentAux xs ys (fun x y => f (x, y)) in
         match OHxsys with
