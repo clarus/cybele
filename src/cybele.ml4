@@ -37,19 +37,19 @@ let cybele c env =
 (*  Errors.todo "Cybele: starting."; *)
   (** Check tactic precondition. *)
   let signature, rtype = check_monadic_computation c env in
-  Errors.todo "Cybele: checked type.";
+  (* Errors.todo "Cybele: checked type."; *)
   (** Reset the state of cybele. *)
   CybeleState.reset ();
-  Errors.todo "Cybele: reset state.";
+  (* Errors.todo "Cybele: reset state."; *)
   (** Compile and execute the oracle. *)
   CybeleDynamicCompilation.compile_and_run_oracle c;
-  Errors.todo "Cybele: compile and run.";
+  (* Errors.todo "Cybele: compile and run."; *)
   (** Compute the prophecy from the state of cybele. *)
   let prophecy = CybeleState.prophecy signature in
-  Errors.todo "Cybele: make prophecy.";
+  (* Errors.todo "Cybele: make prophecy."; *)
   (** Construct the monadic proof-by-reflection. *)
   let proof = monadic_proof_by_reflection signature rtype c prophecy in
-  Errors.todo "Cybele: return the proof.";
+  (* Errors.todo "Cybele: return the proof."; *)
   (** Apply it. *)
   refine proof env
 
