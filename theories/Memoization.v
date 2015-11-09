@@ -79,19 +79,23 @@ Module InputMemo (Map: S).
            (fun _ =>
               let! map := !memo in
                 match Map.find x map with
-                    | Some y => ret y
-                    | None => error "Result not memoized"
-            end)
+                | Some y => ret y
+                | None => error "Result not memoized"
+                end)
            (fun _ =>
               let! y := f x in
-                let! map := !memo in
-                  do! memo :=! Map.add x y map in
+              let! map := !memo in
+              do! memo :=! Map.add x y map in
               ret y)
       ).
   Next Obligation.
-  Admitted.
+    rewrite H in x.
+    exact x.
+  Qed.
   Next Obligation.
-  Admitted.
+    rewrite H.
+    exact x.
+  Qed.
 End InputMemo.
 
 (** Memoization of functions in the temporary memory. More flexible
