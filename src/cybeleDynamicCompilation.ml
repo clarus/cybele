@@ -41,7 +41,7 @@ let define c =
     Namegen.next_ident_away_from base is_visible_name
   in
   ignore (
-    declare_constant ~internal:KernelVerbose fresh_name
+    declare_constant fresh_name
       (DefinitionEntry {
         const_entry_body = c;
         const_entry_secctx = None;
@@ -170,7 +170,7 @@ let sanity_check () =
 (** The oracle compilation and execution. *)
 let compile_and_run_oracle c =
   sanity_check ();
-  let c = Future.from_val ((c,Univ.ContextSet.empty), Declareops.no_seff) in
+  let c = Future.from_val ((c, Univ.ContextSet.empty), Safe_typing.empty_private_constants) in
   let dyncode, files = compile c in
   time "the extracted code" (fun () -> dynload dyncode);
   List.iter cleanup files
