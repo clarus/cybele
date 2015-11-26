@@ -1,18 +1,11 @@
-Cybele
-======
-
-*A Coq plugin for simpler proofs by reflection or OCaml certificates.*
-
+# Cybele
+> A Coq plugin for simpler proofs by reflection or OCaml certificates.
 [http://cybele.gforge.inria.fr/](http://cybele.gforge.inria.fr/)
 
-Requirements
-------------
-
+## Requirements
 This plugin requires the latest trunk version of Coq.
 
-Compilation
------------
-
+## Compilation
 Before anything else, make sure that all the utilities of Coq are in
 your path. Compile by typing:
 
@@ -25,10 +18,8 @@ Finally, install your plugin:
 
 (as root if necessary).
 
-Examples
---------
-
-Go to test-suite/. You can try out each example doing a:
+## Examples
+Go to `test-suite/``. You can try out each example doing a:
 
     ./configure.sh
     make
