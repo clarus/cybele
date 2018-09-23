@@ -20,4 +20,5 @@ Makefile.bak
 config.status
 open.sh
 Makefile
+Makefile.conf
 html/

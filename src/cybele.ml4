@@ -1,5 +1,6 @@
 open Tacmach
 open Entries
+open Stdarg
 
 open CybeleConstants
 
@@ -11,9 +12,9 @@ let check_monadic_computation c env =
   (** Check that it is a monadic computation and extract on which
       signature the monad works and what is the type of the returned
       value. *)
-  let (head, args) = Term.decompose_app cty in
-  if not (Term.eq_constr head (Lazy.force Monad.t)) then
-    CErrors.error "Cybele: The coq tactic must be applied to a monadic term.";
+  let (head, args) = Constr.decompose_app (EConstr.to_constr env.Evd.sigma cty) in
+  if not (Constr.equal head (Lazy.force Monad.t)) then
+    CErrors.user_err (Pp.str "Cybele: The coq tactic must be applied to a monadic term.");
   match args with
     | [ s; t ] -> (s, t)
     | _ -> assert false (** By [c] being well-typed. *)
@@ -21,12 +22,12 @@ let check_monadic_computation c env =
 (** [monadic_proof_by_reflection s t c p] constructs the term:
     [ProofByReflection (IsComputable c p) c p] *)
 let monadic_proof_by_reflection signature rtype c prophecy =
-  Term.mkApp
+  Constr.mkApp
     (Lazy.force Monad.proof_by_reflection, [|
       signature; rtype; c; prophecy;
-      Term.mkApp (Lazy.force Init.eq_refl, [|
+      Constr.mkApp (Lazy.force Init.eq_refl, [|
         Lazy.force Init.bool;
-        Term.mkApp (Lazy.force Monad.is_computable, [|
+        Constr.mkApp (Lazy.force Monad.is_computable, [|
           signature; rtype; c; prophecy
         |])
       |])
@@ -35,6 +36,7 @@ let monadic_proof_by_reflection signature rtype c prophecy =
 (** [cybele c env] is the implementation of the tactic. *)
 let cybele c env =
 (*  Errors.todo "Cybele: starting."; *)
+  let c_constr = EConstr.to_constr env.Evd.sigma c in
   (** Check tactic precondition. *)
   let signature, rtype = check_monadic_computation c env in
   (* Errors.todo "Cybele: checked type."; *)
@@ -42,16 +44,16 @@ let cybele c env =
   CybeleState.reset ();
   (* Errors.todo "Cybele: reset state."; *)
   (** Compile and execute the oracle. *)
-  CybeleDynamicCompilation.compile_and_run_oracle c;
+  CybeleDynamicCompilation.compile_and_run_oracle c_constr;
   (* Errors.todo "Cybele: compile and run."; *)
   (** Compute the prophecy from the state of cybele. *)
   let prophecy = CybeleState.prophecy signature in
   (* Errors.todo "Cybele: make prophecy."; *)
   (** Construct the monadic proof-by-reflection. *)
-  let proof = monadic_proof_by_reflection signature rtype c prophecy in
+  let proof = monadic_proof_by_reflection signature rtype c_constr prophecy in
   (* Errors.todo "Cybele: return the proof."; *)
   (** Apply it. *)
-  refine proof env
+  refine (EConstr.of_constr proof) env
 
 DECLARE PLUGIN "cybelePlugin"
 

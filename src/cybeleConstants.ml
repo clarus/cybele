@@ -1,7 +1,7 @@
 (** This module stores the references to the Coq's namespace. *)
 
 let message = "Cybele"
-let lookup  = Coqlib.gen_constant_in_modules message
+let lookup path value = Universes.constr_of_global (Coqlib.gen_reference_in_modules message path value)
 
 module SExpr = struct
   let constant = lookup [["Cybele"; "Reifiable"; "SExpr"]]

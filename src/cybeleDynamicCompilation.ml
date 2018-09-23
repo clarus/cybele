@@ -15,9 +15,7 @@
     implemented by the module {!CybeleState}.
 *)
 
-open Tacmach
 open Entries
-open Declarations
 open Declare
 
 (** {1 Helper functions} *)
@@ -27,7 +25,7 @@ let define c =
   let fresh_name =
   (** We will use the string "cybele" as a prefix to name the
       monadic computation we want to compile. *)
-    let base = Names.id_of_string "cybele" in
+    let base = Names.Id.of_string "cybele" in
 
   (** [is_visible_name id] returns [true] if [id] is already
       used on the Coq side. *)
@@ -45,10 +43,9 @@ let define c =
       (DefinitionEntry {
         const_entry_body = c;
         const_entry_secctx = None;
-	const_entry_feedback = None;
-	const_entry_type = None;
-	const_entry_polymorphic = false;
-	const_entry_universes = Univ.UContext.empty;
+        const_entry_feedback = None;
+        const_entry_type = None;
+        const_entry_universes = Entries.Polymorphic_const_entry Univ.UContext.empty;
         const_entry_opaque = false;
         const_entry_inline_code = false
        },
@@ -59,22 +56,17 @@ let define c =
 (** [command s] runs [s] and logs the exit status. *)
 let command s =
   let ret = Sys.command s in
-  Pp.msg_with !Pp_control.std_ft (Pp.str (Printf.sprintf "Cybele [%d]: %s\n" ret s))
+  Pp.pp_with Format.std_formatter (Pp.str (Printf.sprintf "Cybele [%d]: %s\n" ret s))
 
 let cleanup fname =
   command (Printf.sprintf "rm %s" fname)
-
-let patch_ocaml_file file_name patch =
-  let channel = open_out_gen [Open_append] 0 file_name in
-  output_string channel patch;
-  close_out channel
 
 (** [time l f] runs [f ()] displaying its running time. *)
 let time l f =
   let start = System.get_time () in
   let y = f () in
   let stop = System.get_time () in
-  Pp.msg_with !Pp_control.std_ft (Pp.str
+  Pp.pp_with Format.std_formatter (Pp.str
                  (Printf.sprintf "Running time of the %s: %f secs\n"
                     l
                     (System.time_difference start stop)));
@@ -114,7 +106,7 @@ let compile c =
     let tmp_intf = Filename.chop_extension tmp ^ ".mli" in
     time "the extraction" (fun () ->
       Extract_env.full_extraction (Some tmp) [
-        Libnames.Ident (Loc.ghost, constant)
+        CAst.make (Libnames.Ident constant)
       ]);
     (** We are not interested in the interface file. *)
     cleanup tmp_intf;
@@ -157,8 +149,9 @@ let dynload f =
   try
     Dynlink.loadfile f
   with Dynlink.Error e ->
-    CErrors.error ("Cybele (during compiled code loading):"
-                   ^ (Dynlink.error_message e))
+    CErrors.user_err (Pp.str (
+      "Cybele (during compiled code loading):" ^ (Dynlink.error_message e)
+    ))
 
 (* FIXME: Implement a sanity check to make sure that dynamic
    compilation and execution is possible. *)
