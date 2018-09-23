@@ -59,7 +59,7 @@ let define c =
 (** [command s] runs [s] and logs the exit status. *)
 let command s =
   let ret = Sys.command s in
-  Pp.msg_info (Pp.str (Printf.sprintf "Cybele [%d]: %s\n" ret s))
+  Pp.msg_with !Pp_control.std_ft (Pp.str (Printf.sprintf "Cybele [%d]: %s\n" ret s))
 
 let cleanup fname =
   command (Printf.sprintf "rm %s" fname)
@@ -74,7 +74,7 @@ let time l f =
   let start = System.get_time () in
   let y = f () in
   let stop = System.get_time () in
-  Pp.msg_info (Pp.str
+  Pp.msg_with !Pp_control.std_ft (Pp.str
                  (Printf.sprintf "Running time of the %s: %f secs\n"
                     l
                     (System.time_difference start stop)));
@@ -88,10 +88,10 @@ let coqlib =
   Filename.concat (Filename.concat (Envars.coqlib ()) "user-contrib") "Cybele"
 
 (** Use site configuration to use the right ocaml native compilers. *)
-let ocamlopt = Envars.ocamlopt ()
+let ocamlopt = Envars.ocamlfind () ^ " ocamlopt"
 
 (** Use site configuration to use the right ocaml bytecode compilers. *)
-let ocamlc = Envars.ocamlc ()
+let ocamlc = Envars.ocamlfind () ^ " ocamlc"
 
 (** compile [c] returns a compiled version of the monadic computation [c]
     in the form of an Ocaml module. *)
@@ -157,7 +157,7 @@ let dynload f =
   try
     Dynlink.loadfile f
   with Dynlink.Error e ->
-    Errors.error ("Cybele (during compiled code loading):"
+    CErrors.error ("Cybele (during compiled code loading):"
                    ^ (Dynlink.error_message e))
 
 (* FIXME: Implement a sanity check to make sure that dynamic

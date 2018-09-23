@@ -13,7 +13,7 @@ let check_monadic_computation c env =
       value. *)
   let (head, args) = Term.decompose_app cty in
   if not (Term.eq_constr head (Lazy.force Monad.t)) then
-    Errors.error "Cybele: The coq tactic must be applied to a monadic term.";
+    CErrors.error "Cybele: The coq tactic must be applied to a monadic term.";
   match args with
     | [ s; t ] -> (s, t)
     | _ -> assert false (** By [c] being well-typed. *)
