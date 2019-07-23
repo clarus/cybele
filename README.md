@@ -1,6 +1,8 @@
 # Cybele
 > A Coq plugin for simpler proofs by reflection or OCaml certificates.
 
+![logo](http://cybele.gforge.inria.fr/img/icon.png)
+
 [http://cybele.gforge.inria.fr/](http://cybele.gforge.inria.fr/)
 
 ## Install with OPAM
