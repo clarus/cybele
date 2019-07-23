@@ -31,7 +31,7 @@ Finally, install your plugin:
 (as root if necessary).
 
 ### Examples
-Go to `test-suite/``. You can try out each example doing a:
+Go to `test-suite/`. You can try out each example doing a:
 
     ./configure.sh
     make
